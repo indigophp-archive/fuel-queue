@@ -108,7 +108,7 @@ class Resque
 
 		if (empty($workers))
 		{
-			\Cli::write("*** No workers running", 'red');
+			return \Cli::write("*** No workers running", 'red');
 		}
 
 		$count = 0;
@@ -135,11 +135,14 @@ class Resque
 
 		\Cli::write("\n$count of " . count($workers) . " Workers Working\n", "yellow");
 
-		\Cli::write("Token\t\t\t\t\tWorker\t\t\tQueue\t\tClass\t\tArgs", "blue");
-
-		foreach ($jobs as $job)
+		if ($count > 0)
 		{
-			\Cli::write($job['payload']['id'] . "\t" . $job["worker"] . "\t" . $job["queue"] . "\t\t" . $job['payload']['class'] . "\t" . json_encode($job['payload']['args']));
+			\Cli::write("Token\t\t\t\t\tWorker\t\t\tQueue\t\tClass\t\tArgs", "blue");
+
+			foreach ($jobs as $job)
+			{
+				\Cli::write($job['payload']['id'] . "\t" . $job["worker"] . "\t" . $job["queue"] . "\t\t" . $job['payload']['class'] . "\t" . json_encode($job['payload']['args']));
+			}
 		}
 	}
 
@@ -201,6 +204,16 @@ class Resque
 				\Cli::write("*** Unpause worker " . $worker, 'green');
 				posix_kill($pid[1], SIGCONT);
 			}
+		}
+	}
+
+	public static function failed()
+	{
+		$failed = \Resque::redis()->lrange('failed', 1, -1);
+
+		foreach ($failed as $job) {
+			$job = json_decode($job);
+			var_dump($job); exit;
 		}
 	}
 }
