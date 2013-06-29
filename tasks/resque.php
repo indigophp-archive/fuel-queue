@@ -98,18 +98,7 @@ class Resque
 
 	public static function status($workers = null)
 	{
-		if (is_null($workers)) {
-			$workers = \Resque_Worker::all();
-		}
-		else
-		{
-			$workers = array(\Resque_Worker::find($workers));
-		}
-
-		if (empty($workers))
-		{
-			return \Cli::write("*** No workers running", 'red');
-		}
+		$workers = static::workers($workers);
 
 		$count = 0;
 		$jobs = array();
@@ -130,7 +119,7 @@ class Resque
 			\Cli::write("\t* Enqueued: " . $worker->getStat('enqueued'), 'blue');
 			\Cli::write("\t* Processed: " . $worker->getStat('processed'), 'green');
 			\Cli::write("\t* Finished: " . $worker->getStat('finished'), 'green');
-			\Cli::write("\t* Failed: " . $worker->getStat('failed'), 'red');
+			\Cli::write("\t* Failed: " . $worker->getStat('failed'), "red");
 		}
 
 		\Cli::write("\n$count of " . count($workers) . " Workers Working\n", "yellow");
@@ -148,34 +137,65 @@ class Resque
 
 	public static function stop($workers = null)
 	{
-		if (is_null($workers)) {
-			$workers = \Resque_Worker::all();
-		}
-		else
-		{
-			$workers = array(\Resque_Worker::find($workers));
-		}
+		$workers = static::workers($workers);
 
 		foreach ($workers as $worker) {
 			if ($worker instanceof \Resque_Worker)
 			{
 				$pid = explode(':', $worker);
-				\Cli::write("*** Stopping worker " . $worker, 'green');
+				\Cli::write("*** Stopping worker $worker\n", "red");
 				posix_kill($pid[1], SIGQUIT);
 				$worker->pruneDeadWorkers();
 			}
 		}
 	}
 
+	public static function restart($workers = null)
+	{
+		$workers = static::workers($workers);
+
+		$blocking = \Cli::option('blocking', \Cli::option('b', \Config::get('queue.blocking', false)));
+		$interval = \Cli::option('interval', \Cli::option('i', \Config::get('queue.interval', 5)));
+
+		$restart = array();
+		foreach ($workers as $worker)
+		{
+			if ($worker instanceof \Resque_Worker)
+			{
+				$pid = explode(':', $worker);
+				$restart[] = array(
+					'queues' => $worker->queues(),
+					'logLevel' => $worker->logLevel
+				);
+
+				\Cli::write("*** Stopping worker $worker\n", "red");
+				posix_kill($pid[1], SIGQUIT);
+				$worker->pruneDeadWorkers();
+			}
+		}
+
+		foreach ($restart as $w)
+		{
+			$pid = \Resque::fork();
+			if($pid == -1)
+			{
+				return \Cli::error("Could not fork worker \n", "red");
+			}
+			// Child, start the worker
+			elseif( ! $pid)
+			{
+				$worker = new \Resque_Worker($w['queues']);
+				$worker->logLevel = $w['logLevel'];
+				\Cli::write("*** Starting worker $worker\n", "green");
+				$worker->work((int) $interval, (bool) $blocking);
+				break;
+			}
+		}
+	}
+
 	public static function pause($workers = null)
 	{
-		if (is_null($workers)) {
-			$workers = \Resque_Worker::all();
-		}
-		else
-		{
-			$workers = array(\Resque_Worker::find($workers));
-		}
+		$workers = static::workers($workers);
 
 		foreach ($workers as $worker) {
 			if ($worker instanceof \Resque_Worker)
@@ -189,13 +209,7 @@ class Resque
 
 	public static function unpause($workers = null)
 	{
-		if (is_null($workers)) {
-			$workers = \Resque_Worker::all();
-		}
-		else
-		{
-			$workers = array(\Resque_Worker::find($workers));
-		}
+		$workers = static::workers($workers);
 
 		foreach ($workers as $worker) {
 			if ($worker instanceof \Resque_Worker)
@@ -214,6 +228,23 @@ class Resque
 		foreach ($failed as $job) {
 			$job = json_decode($job);
 			var_dump($job); exit;
+		}
+	}
+
+	private static function workers($workers = null)
+	{
+		if (is_null($workers)) {
+			$workers = \Resque_Worker::all();
+		}
+		else
+		{
+			$workers = array(\Resque_Worker::find($workers));
+		}
+
+		if (empty($workers))
+		{
+			\Cli::write("*** No workers running", "red");
+			exit(0);
 		}
 	}
 }
