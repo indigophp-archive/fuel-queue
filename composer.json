@@ -11,9 +11,15 @@
 			"email": "sagikazarmark@gmail.com"
 		}
 	],
+	"repositories": [
+		{
+			"type": "git",
+			"url": "https://github.com/sagikazarmark/php-resque-scheduler"
+		}
+	],
 	"require": {
 		"composer/installers": "~1.0",
-		"chrisboulton/php-resque": "*",
+		"chrisboulton/php-resque": "dev-master",
 		"chrisboulton/php-resque-scheduler": "dev-master"
 	},
 	"extra": {
