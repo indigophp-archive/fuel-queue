@@ -20,7 +20,7 @@
 	"require": {
 		"composer/installers": "~1.0",
 		"chrisboulton/php-resque": "dev-master",
-		"chrisboulton/php-resque-scheduler": "dev-master"
+		"sagikazarmark/php-resque-scheduler": "dev-master"
 	},
 	"extra": {
 		"installer-name": "queue"
