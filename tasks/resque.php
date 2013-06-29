@@ -138,13 +138,15 @@ class Resque
 	public static function stop($workers = null)
 	{
 		$workers = static::workers($workers);
+		$sig = \Cli::option('sig', \Cli::option('s', SIGQUIT));
+		is_string($sig) && $sig = constant($sig);
 
 		foreach ($workers as $worker) {
 			if ($worker instanceof \Resque_Worker)
 			{
 				$pid = explode(':', $worker);
 				\Cli::write("*** Stopping worker $worker\n", "red");
-				posix_kill($pid[1], SIGQUIT);
+				posix_kill($pid[1], $sig);
 				$worker->pruneDeadWorkers();
 			}
 		}
@@ -238,13 +240,25 @@ class Resque
 		}
 		else
 		{
-			$workers = array(\Resque_Worker::find($workers));
+			if (\Resque_Worker::exists($workers))
+			{
+				$workers = array(\Resque_Worker::find($workers));
+			}
+			else
+			{
+				\Cli::write("*** Worker $workers does not exists", "red");
+				exit(0);
+			}
 		}
 
 		if (empty($workers))
 		{
 			\Cli::write("*** No workers running", "red");
 			exit(0);
+		}
+		else
+		{
+			return $workers;
 		}
 	}
 }
