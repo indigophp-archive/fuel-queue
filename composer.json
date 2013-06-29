@@ -1,0 +1,21 @@
+{
+	"name": "fuel/queue",
+	"type": "fuel-package",
+	"description": "Queue package",
+	"keywords": ["redis", "resque"],
+	"homepage": "http://fuelphp.com",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Márk Sági-Kazár",
+			"email": "sagikazarmark@gmail.com"
+		}
+	],
+	"require": {
+		"composer/installers": "~1.0",
+		"chrisboulton/php-resque": "*"
+	},
+	"extra": {
+		"installer-name": "queue"
+	}
+}
