@@ -26,6 +26,7 @@ class Resque
 		$interval = \Cli::option('interval', \Cli::option('i', 5));
 		$count = \Cli::option('count', \Cli::option('c', 1));
 		$prefix = \Cli::option('prefix', \Cli::option('p'));
+		$pidfile = \Cli::option('pidfile');
 
 		if (empty($queue) || ! is_string($queue))
 		{
@@ -80,11 +81,10 @@ class Resque
 			$worker = new \Resque_Worker($queues);
 			$worker->logLevel = $logLevel;
 
-			$PIDFILE = getenv('PIDFILE');
-			if ($PIDFILE)
+			if ($pidfile)
 			{
-				file_put_contents($PIDFILE, getmypid()) or
-					die('Could not write PID information to ' . $PIDFILE);
+				file_put_contents($pidfile, getmypid()) ||
+					\Cli::write(\Cli::color("*** Writing to PID file failed\n", "red"));
 			}
 
 			\Cli::write(\Cli::color("*** Starting worker $worker\n", "green"));
