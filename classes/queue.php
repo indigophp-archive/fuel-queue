@@ -22,16 +22,14 @@ class Queue
 	 * @var array
 	 */
 	protected static $_defaults = array(
-		'driver' => 'resque'
+		'driver'   => 'resque',
+		'redis'    => '127.0.0.1:6379',
+		'workers'  => 2,
+		'interval' => 5,
+		'blocking' => false,
+		'prefix'   => 'fuel',
+		'db'       => 0
 	);
-
-	/**
-	 * Init
-	 */
-	public static function _init()
-	{
-		\Config::load('queue', true);
-	}
 
 	/**
 	 * Queue driver forge.

@@ -12,3 +12,17 @@ Autoloader::add_classes(array(
 	'Queue\\Queue_Resque' => __DIR__ . '/classes/queue/resque.php',
 	'Queue\\Queue_Direct' => __DIR__ . '/classes/queue/direct.php',
 ));
+
+\Config::load('queue', true);
+
+$event = \Event::instance('queue');
+
+$event->register('resque_init', function(){
+	\Resque_Event::listen('onFailure', function($job) {
+		$instance = $job->getInstance();
+		if (is_callable(array($instance, 'onFailure')))
+		{
+			$instance->onFailure();
+		}
+	});
+});

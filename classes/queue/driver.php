@@ -26,6 +26,7 @@ abstract class Queue_Driver
 	{
 		$this->queue = $queue;
 		$this->config = $config;
+		$this->_init();
 	}
 
 	/**
@@ -53,6 +54,8 @@ abstract class Queue_Driver
 
 		return $this;
 	}
+
+	abstract protected function _init();
 
 	abstract public function enqueue($job, $args = null);
 }
