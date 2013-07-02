@@ -18,14 +18,17 @@ Autoloader::add_classes(array(
 $event = \Event::instance('queue');
 
 $event->register('resque_init', function(){
-	\Resque_Event::listen('onFailure', function($job) {
-		if ($job instanceof \Resque_Job)
-		{
-			$instance = $job->getInstance();
-			if (is_callable(array($instance, 'onFailure')))
+	if (class_exists('\\Resque_Event'))
+	{
+		\Resque_Event::listen('onFailure', function($job) {
+			if ($job instanceof \Resque_Job)
 			{
-				$instance->onFailure();
+				$instance = $job->getInstance();
+				if (is_callable(array($instance, 'onFailure')))
+				{
+					$instance->onFailure();
+				}
 			}
-		}
-	});
+		});
+	}
 });
