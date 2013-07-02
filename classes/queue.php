@@ -70,7 +70,7 @@ class Queue
 		{
 			if ( ! array_key_exists($instance, static::$_instances))
 			{
-				return false;
+				static::forge($instance);
 			}
 
 			return static::$_instances[$instance];
