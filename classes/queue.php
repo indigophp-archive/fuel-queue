@@ -74,4 +74,13 @@ class Queue
 		static::instance($queue)->enqueue($job, $args);
 	}
 
+	/**
+	 * class constructor
+	 *
+	 * @param	void
+	 * @access	private
+	 * @return	void
+	 */
+	final private function __construct() {}
+
 }
