@@ -8,11 +8,6 @@ class Queue
 {
 
 	/**
-	 * loaded instance
-	 */
-	protected static $_instance = null;
-
-	/**
 	 * array of loaded instances
 	 */
 	protected static $_instances = array();
@@ -53,9 +48,9 @@ class Queue
 
 		$driver = new $class($queue, $config);
 
-		static::$_instances[$queue] = $driver;
+		static::$_instances[$queue] =& $driver;
 
-		return $driver;
+		return static::$_instances[$queue];
 	}
 
 	/**
@@ -64,27 +59,17 @@ class Queue
 	 * @param   string  $instance
 	 * @return  Queue instance
 	 */
-	public static function instance($instance = null)
+	public static function instance($instance = 'default')
 	{
-		if ($instance !== null)
+		if ( ! array_key_exists($instance, static::$_instances))
 		{
-			if ( ! array_key_exists($instance, static::$_instances))
-			{
-				static::forge($instance);
-			}
-
-			return static::$_instances[$instance];
+			static::forge($instance);
 		}
 
-		if (static::$_instance === null)
-		{
-			static::$_instance = static::forge();
-		}
-
-		return static::$_instance;
+		return static::$_instances[$instance];
 	}
 
-	public static function enqueue($queue = null, $job, $args = null)
+	public static function enqueue($job, $args = null, $queue = 'default')
 	{
 		static::instance($queue)->enqueue($job, $args);
 	}

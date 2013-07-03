@@ -1,5 +1,7 @@
 <?php
 
+Config::load('queue', true);
+
 Autoloader::add_core_namespace('Queue');
 
 Autoloader::add_classes(array(
@@ -13,22 +15,23 @@ Autoloader::add_classes(array(
 	'Queue\\Queue_Direct' => __DIR__ . '/classes/queue/direct.php',
 ));
 
-\Config::load('queue', true);
+if (\Fuel::$is_cli)
+{
+	$event = \Event::instance('queue');
 
-$event = \Event::instance('queue');
-
-$event->register('resque_init', function(){
-	if (class_exists('\\Resque_Event'))
-	{
-		\Resque_Event::listen('onFailure', function($job) {
-			if ($job instanceof \Resque_Job)
-			{
-				$instance = $job->getInstance();
-				if (is_callable(array($instance, 'onFailure')))
+	$event->register('resque_init', function(){
+		if (class_exists('\\Resque_Event'))
+		{
+			\Resque_Event::listen('onFailure', function($job) {
+				if ($job instanceof \Resque_Job)
 				{
-					$instance->onFailure();
+					$instance = $job->getInstance();
+					if (is_callable(array($instance, 'onFailure')))
+					{
+						$instance->onFailure();
+					}
 				}
-			}
-		});
-	}
-});
+			});
+		}
+	});
+}
