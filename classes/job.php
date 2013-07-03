@@ -2,7 +2,4 @@
 
 namespace Fuel\Core;
 
-class Job
-{
-
-}
+class Job {}

@@ -4,6 +4,7 @@ namespace Queue;
 
 class Queue_Direct extends Queue_Driver
 {
+
 	public function enqueue($job, array $args = array())
 	{
 
