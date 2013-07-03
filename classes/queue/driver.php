@@ -55,7 +55,17 @@ abstract class Queue_Driver
 		return $this;
 	}
 
+	/**
+	 * Init function instead of the __construct
+	 * @return void
+	 */
 	abstract protected function _init();
 
+	/**
+	 * Enqueue a job
+	 * @param  string $job   Job name
+	 * @param  array $args  Optional array of arguments
+	 * @return string        Job token
+	 */
 	abstract public function enqueue($job, array $args = array());
 }
