@@ -10,8 +10,14 @@ class Queue_Resque extends Queue_Driver
 		\Resque_Redis::prefix($this->get_config('prefix', 'fuel'));
 	}
 
-	public function enqueue($job, $args = null)
+	public function enqueue($job, array $args = array())
 	{
+
+		if( ! class_exists($job, true))
+		{
+			throw new \FuelException('Could not find Job: ' . $job);
+		}
+
 		return \Resque::enqueue($this->queue, $job, $args);
 	}
 }

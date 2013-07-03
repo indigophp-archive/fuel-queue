@@ -57,5 +57,5 @@ abstract class Queue_Driver
 
 	abstract protected function _init();
 
-	abstract public function enqueue($job, $args = null);
+	abstract public function enqueue($job, array $args = array());
 }
