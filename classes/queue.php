@@ -39,7 +39,7 @@ class Queue
 
 		$config = \Arr::merge(static::$_defaults, \Config::get('queue', array()), $config);
 
-		$class = '\\Queue\\Queue_' . ucfirst($config['driver']);
+		$class = '\\Queue\\Queue_' . ucfirst(strtolower($config['driver']));
 
 		if( ! class_exists($class, true))
 		{
