@@ -24,7 +24,7 @@ class Resque
 		$count = \Cli::option('count', \Cli::option('c', \Config::get('queue.resque.count', 1)));
 		$pidfile = \Cli::option('pidfile');
 
-		if (! is_array($queue))
+		if ( ! is_array($queue))
 		{
 			return \Cli::error("Set --queue or -q parameter containing the list of queues to work.\n", "red");
 		}
