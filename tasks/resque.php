@@ -16,28 +16,30 @@ class Resque
 	 */
 	public static function run()
 	{
-		$queue = \Cli::option('queue', \Cli::option('q', 'default'));
-		$log = \Cli::option('log', \Cli::option('l'));
+		$queue = explode(',', \Cli::option('queue', \Cli::option('q', 'default')));
+		$log = \Cli::option('log', \Cli::option('l', \Config::get('queue.resque.log', 'LOG_NORMAL')));
 		$verbose = \Cli::option('verbose', \Cli::option('v'));
-		$vverbose = \Cli::option('vverbose', \Cli::option('vv'));
-		$blocking = \Cli::option('blocking', \Cli::option('b', \Config::get('queue.blocking', false)));
-		$interval = \Cli::option('interval', \Cli::option('i', \Config::get('queue.interval', 5)));
-		$count = \Cli::option('count', \Cli::option('c', \Config::get('queue.workers', 1)));
+		$blocking = \Cli::option('blocking', \Cli::option('b', \Config::get('queue.resque.blocking', false)));
+		$interval = \Cli::option('interval', \Cli::option('i', \Config::get('queue.resque.interval', 5)));
+		$count = \Cli::option('count', \Cli::option('c', \Config::get('queue.resque.count', 1)));
 		$pidfile = \Cli::option('pidfile');
 
-		if (empty($queue) || ! is_string($queue))
+		if (! is_array($queue))
 		{
 			return \Cli::error("Set --queue or -q parameter containing the list of queues to work.\n", "red");
 		}
 
-		$logLevel = 0;
-		if( ! empty($log) || ! empty($verbose))
+		if(defined(' \Resque_Worker::' . $log))
 		{
-			$logLevel = \Resque_Worker::LOG_NORMAL;
+			$log = constant(' \Resque_Worker::' . $log);
 		}
-		elseif( ! empty($vverbose))
+		elseif( ! empty($verbose))
 		{
-			$logLevel = \Resque_Worker::LOG_VERBOSE;
+			$log = \Resque_Worker::LOG_VERBOSE;
+		}
+		else
+		{
+			$log = \Resque_Worker::LOG_NORMAL;
 		}
 
 		\Event::instance('queue')->trigger('resque_init');
@@ -54,9 +56,8 @@ class Resque
 				// Child, start the worker
 				elseif( ! $pid)
 				{
-					$queues = explode(',', $queue);
-					$worker = new \Resque_Worker($queues);
-					$worker->logLevel = $logLevel;
+					$worker = new \Resque_Worker($queue);
+					$worker->logLevel = $log;
 					\Cli::write("*** Starting worker $worker\n", "green");
 					$worker->work((int) $interval, (bool) $blocking);
 					break;
@@ -66,9 +67,8 @@ class Resque
 		// Start a single worker
 		else
 		{
-			$queues = explode(',', $queue);
-			$worker = new \Resque_Worker($queues);
-			$worker->logLevel = $logLevel;
+			$worker = new \Resque_Worker($queue);
+			$worker->logLevel = $log;
 
 			if ($pidfile)
 			{
