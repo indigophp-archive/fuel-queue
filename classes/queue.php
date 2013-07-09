@@ -19,7 +19,6 @@ class Queue
 	protected static $_defaults = array(
 		'driver'   => 'resque',
 		'redis'    => '127.0.0.1:6379',
-		'workers'  => 2,
 		'interval' => 5,
 		'blocking' => false,
 		'prefix'   => 'fuel',

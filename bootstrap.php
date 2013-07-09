@@ -13,6 +13,7 @@ Autoloader::add_classes(array(
 
 	'Queue\\Queue_Resque' => __DIR__ . '/classes/queue/resque.php',
 	'Queue\\Queue_Direct' => __DIR__ . '/classes/queue/direct.php',
+	'Queue\\Queue_Beanstalkd' => __DIR__ . '/classes/queue/beanstalkd.php',
 ));
 
 if (\Fuel::$is_cli)
