@@ -62,10 +62,10 @@ abstract class Queue_Driver
 	abstract protected function _init();
 
 	/**
-	 * Enqueue a job
+	 * Push a job to the queue
 	 * @param  string $job   Job name
 	 * @param  array $args  Optional array of arguments
 	 * @return string        Job token
 	 */
-	abstract public function enqueue($job, array $args = array());
+	abstract public function push($job, array $args = array());
 }

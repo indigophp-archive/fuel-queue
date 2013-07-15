@@ -69,13 +69,13 @@ class Queue
 	}
 
 	/**
-	 * Enqueue a job from static interface
+	 * Push a job from static interface
 	 * @param  string $job   Job name
 	 * @param  array $args  Optional array of arguments
 	 * @param  string $queue Optional queue name
 	 * @return string        Job token
 	 */
-	public static function enqueue($job, array $args = array(), $queue = 'default')
+	public static function push($job, array $args = array(), $queue = 'default')
 	{
 		return static::instance($queue)->enqueue($job, $args);
 	}
