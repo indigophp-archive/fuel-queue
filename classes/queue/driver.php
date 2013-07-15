@@ -22,7 +22,7 @@ abstract class Queue_Driver
 	*
 	* @param array $config driver config
 	*/
-	public function __construct($queue, array $config = array())
+	final public function __construct($queue, array $config = array())
 	{
 		$this->queue = $queue;
 		$this->config = $config;
