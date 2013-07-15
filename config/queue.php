@@ -9,5 +9,8 @@ return array(
 		'blocking' => false,
 		'prefix' => 'fuel',
 		'db' => 0,
+	),
+	'beanstalkd' => array(
+		
 	)
 );

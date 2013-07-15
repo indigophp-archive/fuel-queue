@@ -2,15 +2,10 @@
 
 namespace Queue;
 
-class QueueException extends \FuelException {}
+class WorkerException extends \FuelException {}
 
-class Queue
+class Worker
 {
-
-	/**
-	 * array of loaded instances
-	 */
-	protected static $_instances = array();
 
 	/**
 	 * Default config
@@ -26,11 +21,11 @@ class Queue
 	);
 
 	/**
-	 * Queue driver forge.
+	 * Worker driver forge.
 	 *
 	 * @param	string			$queue		Queue name
 	 * @param	mixed			$config		Extra config array or the driver
-	 * @return  Queue instance
+	 * @return  Worker instance
 	 */
 	public static function forge($queue = 'default', $config = array())
 	{
