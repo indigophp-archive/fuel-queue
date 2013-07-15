@@ -17,12 +17,7 @@ class Queue
 	 * @var array
 	 */
 	protected static $_defaults = array(
-		'driver'   => 'resque',
-		'redis'    => '127.0.0.1:6379',
-		'interval' => 5,
-		'blocking' => false,
-		'prefix'   => 'fuel',
-		'db'       => 0
+		'driver'   => 'resque'
 	);
 
 	/**
