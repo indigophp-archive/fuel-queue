@@ -29,7 +29,10 @@ class Queue
 	 */
 	public static function forge($queue = 'default', $config = array())
 	{
-		! is_array($config) && $config = array('driver' => $config);
+		if ( ! empty($custom) and ! is_array($custom))
+		{
+			$config = array('driver' => $config);
+		}
 
 		$config = \Arr::merge(static::$_defaults, \Config::get('queue', array()), $config);
 
