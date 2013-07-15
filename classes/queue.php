@@ -24,23 +24,32 @@ class Queue
 	 * Queue driver forge.
 	 *
 	 * @param	string			$queue		Queue name
-	 * @param	mixed			$config		Extra config array or the driver
+	 * @param	mixed			$custom		Extra config array or the driver
 	 * @return  Queue instance
 	 */
-	public static function forge($queue = 'default', $config = array())
+	public static function forge($queue = 'default', $custom = array())
 	{
 		if ( ! empty($custom) and ! is_array($custom))
 		{
-			$config = array('driver' => $config);
+			$custom = array('driver' => $custom);
 		}
 
-		$config = \Arr::merge(static::$_defaults, \Config::get('queue', array()), $config);
+		$config = \Arr::merge(static::$_defaults, \Config::get('queue', array()), $custom);
+
+		if ( ! empty($config['driver']))
+		{
+			$config = \Arr::merge($config, \Config::get('queue.' . $config['driver'], array()), $custom);
+		}
+		else
+		{
+			throw new \QueueException('No queue driver given or no default queue driver set.');
+		}
 
 		$class = '\\Queue\\Queue_' . ucfirst(strtolower($config['driver']));
 
 		if( ! class_exists($class, true))
 		{
-			throw new \FuelException('Could not find Queue driver: ' . $config['driver']);
+			throw new \QueueException('Could not find Queue driver: ' . $config['driver']);
 		}
 
 		$driver = new $class($queue, $config);
