@@ -2,12 +2,12 @@
 
 namespace Queue;
 
-abstract class Queue_Driver
+abstract class Worker_Driver
 {
 
 	/**
-	 * Queue identifier
-	 * @var string
+	 * Queue identifier(s)
+	 * @var array
 	 */
 	protected $queue;
 
@@ -62,26 +62,7 @@ abstract class Queue_Driver
 	abstract protected function _init();
 
 	/**
-	 * Push a job to the queue
-	 * @param  string $job   Job name
-	 * @param  array $args  Optional array of arguments
-	 * @return string        Job token
+	 * Initialize worker
 	 */
-	public function push($job, array $args = array())
-	{
-		if( ! class_exists($job, true))
-		{
-			throw new \QueueException('Could not find Job: ' . $job);
-		}
-
-		return $this->_push($job, $args);
-	}
-
-	/**
-	 * Push a job to the queue
-	 * @param  string $job   Job name
-	 * @param  array $args  Optional array of arguments
-	 * @return string        Job token
-	 */
-	abstract protected function _push($job, array $args = array());
+	abstract public function work();
 }

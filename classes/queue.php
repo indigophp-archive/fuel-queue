@@ -42,7 +42,7 @@ class Queue
 		}
 		else
 		{
-			throw new \QueueException('No queue driver given or no default queue driver set.');
+			throw new \QueueException('No Queue driver given or no default Queue driver set.');
 		}
 
 		$class = '\\Queue\\Queue_' . ucfirst(strtolower($config['driver']));

@@ -18,22 +18,24 @@ class Beanstalkd
 
 			if ($job instanceof \Pheanstalk_Job)
 			{
-				$a = json_decode($job->getData(), true);
-				$class = $a['job'];
-				$class = new $class();
-				$class->args=$a['args'];
-
-				$class->fire();
-
 				$stat = $this->instance->statsJob($job);
-				if ($stat->releases > 3)
+				if ($stat->reserves - $stat->releases > 4)
 				{
 					$this->instance->bury($job);
+					continue;
 				}
 				else
 				{
-					$this->instance->release($job, 1024, 5);
+					$a = json_decode($job->getData(), true);
+					$class = $a['job'];
+					$class = new $class();
+					$class->args=$a['args'];
+
+					$class->fire();
+					$this->instance->delete($job);
 				}
+
+
 			}
 		}
 	}

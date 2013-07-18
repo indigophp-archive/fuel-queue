@@ -11,6 +11,7 @@ return array(
 		'db' => 0,
 	),
 	'beanstalkd' => array(
-		
+		'host' => '127.0.0.1',
+		'port' => '11300'
 	)
 );
