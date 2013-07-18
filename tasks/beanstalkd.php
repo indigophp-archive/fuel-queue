@@ -34,8 +34,6 @@ class Beanstalkd
 					$class->fire();
 					$this->instance->delete($job);
 				}
-
-
 			}
 		}
 	}
@@ -45,4 +43,5 @@ class Beanstalkd
 		$this->instance = new \Pheanstalk_Pheanstalk('127.0.0.1');
 		var_dump($this->instance->statsTube('default2')); exit;
 	}
+
 }
