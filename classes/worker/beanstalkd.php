@@ -25,7 +25,7 @@ class Worker_Beanstalkd extends Worker_Driver
 			if ($job instanceof \Pheanstalk_Job)
 			{
 				$stat = $this->instance->statsJob($job);
-				if ($stat->reserves - $stat->releases > 4)
+				if ($stat->reserves - $stat->releases >= $this->get_config('max_retry', 5))
 				{
 					$this->instance->bury($job);
 					continue;
