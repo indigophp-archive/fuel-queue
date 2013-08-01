@@ -22,9 +22,8 @@ abstract class Worker_Driver
 	*
 	* @param array $config driver config
 	*/
-	final public function __construct($queue, array $config = array())
+	final public function __construct(array $config = array())
 	{
-		$this->queue = $queue;
 		$this->config = $config;
 		$this->_init();
 	}

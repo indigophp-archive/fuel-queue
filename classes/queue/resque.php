@@ -7,8 +7,9 @@ class Queue_Resque extends Queue_Driver
 
 	protected function _init()
 	{
-		\Resque::setBackend($this->get_config('redis', '127.0.0.1:6379'), $this->get_config('db', 0));
-		\Resque_Redis::prefix($this->get_config('prefix', 'fuel'));
+		$redis = $this->get_config('host', '127.0.0.1') . ':' . $this->get_config('port', '6379');
+		\Resque::setBackend($redis, $this->get_config('redis.db', 0));
+		\Resque_Redis::prefix($this->get_config('redis.prefix', 'fuel'));
 	}
 
 	protected function _push($job, array $args = array())

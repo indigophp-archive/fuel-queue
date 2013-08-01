@@ -11,36 +11,30 @@ class Worker
 	 * Default config
 	 * @var array
 	 */
-	protected static $_defaults = array(
-		'driver'   => 'resque'
-	);
+	protected static $_defaults;
 
 	/**
 	 * Worker driver forge.
 	 *
-	 * @param	mixed			$queue		Queue name
-	 * @param	mixed			$custom		Extra config array or the driver
+	 * @param	mixed			$setup		Setup name
+	 * @param	mixed			$config		Extra config array or the driver
 	 * @return  Worker instance
 	 */
-	public static function forge($queue = 'default', $custom = array())
+	public static function forge($setup = null, $config = array())
 	{
-		if ( ! empty($custom) and ! is_array($custom))
+
+		empty($setup) and $setup = \Config::get('queue.default_setup', 'default');
+		is_string($setup) and $setup = \Config::get('queue.setups.'.$setup, array());
+
+		if ( ! empty($config) and ! is_array($config))
 		{
-			$custom = array('driver' => $custom);
+			$config = array('driver' => $config);
 		}
 
-		! is_array($queue) && $queue = explode(',', $queue);
+		$setup = \Arr::merge(static::$_defaults, $setup);
+		$config = \Arr::merge($setup, $config);
 
-		$config = \Arr::merge(static::$_defaults, \Config::get('queue', array()), $custom);
-
-		if ( ! empty($config['driver']))
-		{
-			$config = \Arr::merge($config, \Config::get('queue.' . $config['driver'], array()), $custom);
-		}
-		else
-		{
-			throw new \WorkerException('No Worker driver given or no default Worker driver set.');
-		}
+		! is_array($config['queue']) && $config['queue'] = explode(',', $config['queue']);
 
 		$class = '\\Queue\\Worker_' . ucfirst(strtolower($config['driver']));
 
@@ -49,9 +43,17 @@ class Worker
 			throw new \WorkerException('Could not find Worker driver: ' . $config['driver']);
 		}
 
-		$driver = new $class($queue, $config);
+		$driver = new $class($config);
 
 		return $driver;
+	}
+
+	/**
+	 * Init, config loading.
+	 */
+	public static function _init()
+	{
+		static::$_defaults = \Config::get('queue.defaults');
 	}
 
 	/**

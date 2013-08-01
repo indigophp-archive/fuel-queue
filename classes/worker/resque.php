@@ -6,12 +6,16 @@ class Worker_Resque extends Worker_Driver
 {
 	protected function _init()
 	{
-		$this->instance = new \Resque_Worker($this->queue);
-		$this->instance->logLevel = $this->get_config('log', \Resque_Worker::LOG_NORMAL)
+		$redis = $this->get_config('host', '127.0.0.1') . ':' . $this->get_config('port', '6379');
+		\Resque::setBackend($redis, $this->get_config('redis.db', 0));
+		\Resque_Redis::prefix($this->get_config('redis.prefix', 'fuel'));
+
+		$this->instance = new \Resque_Worker($this->get_config('queue', array('default')));
+		$this->instance->logLevel = $this->get_config('log', \Resque_Worker::LOG_NORMAL);
 	}
 
 	public function work()
 	{
-		$worker->work((int) $this->get_config('interval', 3), (bool) $this->get_config('blocking', false));
+		$this->instance->work(1, false);
 	}
 }

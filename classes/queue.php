@@ -16,40 +16,40 @@ class Queue
 	 * Default config
 	 * @var array
 	 */
-	protected static $_defaults = array(
-		'driver'   => 'resque'
-	);
+	protected static $_defaults;
 
 	/**
 	 * Queue driver forge.
 	 *
 	 * @param	string			$queue		Queue name
-	 * @param	mixed			$custom		Extra config array or the driver
+	 * @param	mixed			$setup		Setup name or extra config
+	 * @param	mixed			$config		Extra config array
 	 * @return  Queue instance
 	 */
-	public static function forge($queue = 'default', $custom = array())
+	public static function forge($queue = 'default', $setup = null, $config = array())
 	{
-		if ( ! empty($custom) and ! is_array($custom))
+		if(is_array($setup))
 		{
-			$custom = array('driver' => $custom);
+			$config = \Arr::merge($setup, $config);
+			$setup = null;
 		}
 
-		$config = \Arr::merge(static::$_defaults, \Config::get('queue', array()), $custom);
+		empty($setup) and $setup = \Config::get('queue.default_setup', 'default');
+		is_string($setup) and $setup = \Config::get('queue.setups.'.$setup, array());
 
-		if ( ! empty($config['driver']))
-		{
-			$config = \Arr::merge($config, \Config::get('queue.' . $config['driver'], array()), $custom);
-		}
-		else
-		{
-			throw new \QueueException('No Queue driver given or no default Queue driver set.');
-		}
+		$setup = \Arr::merge(static::$_defaults, $setup);
+		$config = \Arr::merge($setup, $config);
 
 		$class = '\\Queue\\Queue_' . ucfirst(strtolower($config['driver']));
 
 		if( ! class_exists($class, true))
 		{
 			throw new \QueueException('Could not find Queue driver: ' . $config['driver']);
+		}
+
+		if( ! in_array($queue, $config['queue']))
+		{
+			throw new \QueueException($queue . ' is not part of this setup.');
 		}
 
 		$driver = new $class($queue, $config);
@@ -60,16 +60,26 @@ class Queue
 	}
 
 	/**
+	 * Init, config loading.
+	 */
+	public static function _init()
+	{
+		static::$_defaults = \Config::get('queue.defaults');
+	}
+
+	/**
 	 * Return a specific driver, or the default instance (is created if necessary)
 	 *
 	 * @param   string  $instance
+	 * @param	mixed			$setup		Setup name or extra config
+	 * @param	mixed			$config		Extra config array
 	 * @return  Queue instance
 	 */
-	public static function instance($instance = 'default')
+	public static function instance($instance = 'default', $setup = null, $config = array())
 	{
 		if ( ! array_key_exists($instance, static::$_instances))
 		{
-			return static::forge($instance);
+			return static::forge($instance, $setup, $config);
 		}
 
 		return static::$_instances[$instance];

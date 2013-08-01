@@ -8,11 +8,13 @@ class Worker_Beanstalkd extends Worker_Driver
 	{
 		$this->instance = new \Pheanstalk_Pheanstalk($this->get_config('host', '127.0.0.1'), $this->get_config('port', '11300'));
 
-		$this->instance->ignore('default');
+		$queues = $this->get_config('queue', array('default'));
 
-		foreach ($this->queue as $queue)
+		in_array('default', $queues) || $this->instance->ignore('default');
+
+		foreach ($queues as $queue)
 		{
-			$this->watch($queue);
+			$this->instance->watch($queue);
 		}
 	}
 
