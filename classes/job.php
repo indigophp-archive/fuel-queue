@@ -2,13 +2,13 @@
 
 namespace Fuel\Core;
 
-abstract class Job {
+class Job {
 
-	abstract public function before();
+	public function before() {}
 
-	abstract function run();
+	public function run() {}
 
-	abstract function after();
+	public function after() {}
 
 	public function __call($method, $arguments)
 	{

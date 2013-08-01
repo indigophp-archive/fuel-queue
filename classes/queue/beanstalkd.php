@@ -31,5 +31,5 @@ class Queue_Beanstalkd extends Queue_Driver
 			->put(json_encode(array('job' => $job, 'args' => $args)), $priority, $delay, $ttr);
 	}
 
-	protected function _push($job, $args) {}
+	protected function _push($job, array $args = array()) {}
 }

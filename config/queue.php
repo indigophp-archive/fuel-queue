@@ -12,6 +12,7 @@ return array(
 	),
 	'beanstalkd' => array(
 		'host' => '127.0.0.1',
-		'port' => '11300'
+		'port' => '11300',
+		'max_retry' => 5
 	)
 );
