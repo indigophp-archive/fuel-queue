@@ -47,7 +47,7 @@ class Queue
 			throw new \QueueException('Could not find Queue driver: ' . $config['driver']);
 		}
 
-		if( ! in_array($queue, $config['queue']))
+		if(($config['restrict_queue'] === true && ! in_array($queue, $config['queue'])) && ! in_array('*', $config['queue']))
 		{
 			throw new \QueueException($queue . ' is not part of this setup.');
 		}
