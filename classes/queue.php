@@ -19,15 +19,20 @@ class Queue
 	protected static $_defaults;
 
 	/**
-	 * Queue driver forge.
+	 * Queue driver instance.
 	 *
 	 * @param	string			$queue		Queue name
 	 * @param	mixed			$setup		Setup name or extra config
 	 * @param	mixed			$config		Extra config array
 	 * @return  Queue instance
 	 */
-	public static function forge($queue = 'default', $setup = null, $config = array())
+	public static function instance($queue = 'default', $setup = null, $config = array())
 	{
+		if (array_key_exists($queue, static::$_instances))
+		{
+			return static::$_instances[$instance];
+		}
+
 		if(is_array($setup))
 		{
 			$config = \Arr::merge($setup, $config);
@@ -65,24 +70,6 @@ class Queue
 	public static function _init()
 	{
 		static::$_defaults = \Config::get('queue.defaults');
-	}
-
-	/**
-	 * Return a specific driver, or the default instance (is created if necessary)
-	 *
-	 * @param   string  $instance
-	 * @param	mixed			$setup		Setup name or extra config
-	 * @param	mixed			$config		Extra config array
-	 * @return  Queue instance
-	 */
-	public static function instance($instance = 'default', $setup = null, $config = array())
-	{
-		if ( ! array_key_exists($instance, static::$_instances))
-		{
-			return static::forge($instance, $setup, $config);
-		}
-
-		return static::$_instances[$instance];
 	}
 
 	/**
