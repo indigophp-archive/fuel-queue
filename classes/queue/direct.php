@@ -19,12 +19,16 @@ class Queue_Direct extends Queue_Driver
 
 	protected function _push($job, array $args = array())
 	{
-
 		$job = new $job;
 		$job->args = $args;
 
-		$job->before();
-		$job->run();
-		$job->after();
+		try
+		{
+			$job->run();
+		}
+		catch (\Exception $e)
+		{
+			$this->failure($e);
+		}
 	}
 }

@@ -1,4 +1,14 @@
 <?php
+/**
+ * Fuel Queue
+ *
+ * @package 	Fuel
+ * @subpackage	Queue
+ * @version		1.0
+ * @author 		Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ * @license 	MIT License
+ * @link 		https://github.com/indigo-soft
+ */
 
 namespace Queue;
 
@@ -6,13 +16,15 @@ abstract class Queue_Driver
 {
 
 	/**
-	 * Queue identifier
+	 * Queue name
+	 *
 	 * @var string
 	 */
 	protected $queue;
 
 	/**
 	* Driver config
+	*
 	* @var array
 	*/
 	protected $config = array();
@@ -20,9 +32,10 @@ abstract class Queue_Driver
 	/**
 	* Driver constructor
 	*
-	* @param array $config driver config
+	* @param	string	$queue		Queue
+	* @param	array	$config		Driver config
 	*/
-	final public function __construct($queue, array $config = array())
+	public function __construct($queue, array $config = array())
 	{
 		$this->queue = $queue;
 		$this->config = $config;
@@ -63,16 +76,16 @@ abstract class Queue_Driver
 	}
 
 	/**
-	 * Init function instead of the __construct
-	 * @return void
+	 * Init function
 	 */
 	abstract protected function _init();
 
 	/**
 	 * Push a job to the queue
-	 * @param  string $job   Job name
-	 * @param  array $args  Optional array of arguments
-	 * @return string        Job token
+	 *
+	 * @param	string	$job	Job name
+	 * @param	array	$args	Optional array of arguments
+	 * @return	string			Job token
 	 */
 	public function push($job, array $args = array())
 	{
@@ -80,15 +93,22 @@ abstract class Queue_Driver
 		{
 			throw new \QueueException('Could not find Job: ' . $job);
 		}
-
-		return $this->_push($job, $args);
+		if (func_num_args() > 2)
+		{
+			call_user_func_array(array($this, '_push'), func_get_args());
+		}
+		else
+		{
+			return $this->_push($job, $args);
+		}
 	}
 
 	/**
 	 * Push a job to the queue
-	 * @param  string $job   Job name
-	 * @param  array $args  Optional array of arguments
-	 * @return string        Job token
+	 *
+	 * @param	string	$job	Job name
+	 * @param 	array	$args	Optional array of arguments
+	 * @return	string			Job token
 	 */
 	abstract protected function _push($job, array $args = array());
 }
