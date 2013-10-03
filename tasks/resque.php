@@ -24,7 +24,11 @@ class Resque
 
 		// Create the streamhandler, and activate the handler (copied from Log class)
 		$stream = new \Monolog\Handler\StreamHandler($filename, \Monolog\Logger::NOTICE);
-		$formatter = new \Monolog\Formatter\ResqueFormatter("%level_name% - %datetime% --> %message%".PHP_EOL, "Y-m-d H:i:s");
+		$formatter = new \Monolog\Formatter\ContextLineFormatter("%level_name% - %datetime% --> %message%".PHP_EOL, "Y-m-d H:i:s");
+		$stream->setFormatter($formatter);
+		$this->logger->pushHandler($stream);
+		$stream = new \Monolog\Handler\ConsoleHandler(\Monolog\Logger::NOTICE);
+		$formatter = new \Monolog\Formatter\ContextLineFormatter("%message%".PHP_EOL, "Y-m-d H:i:s");
 		$stream->setFormatter($formatter);
 		$this->logger->pushHandler($stream);
 
@@ -33,7 +37,6 @@ class Resque
 
 		if ( ! empty($prefix) && is_string($prefix))
 		{
-			\Cli::write("*** Prefix set to $prefix\n", "blue");
 			$this->logger->log(\Monolog\Logger::INFO, 'Prefix set to {prefix}', array('prefix' => $prefix));
 			\Resque_Redis::prefix($prefix);
 		}
@@ -69,14 +72,12 @@ class Resque
 				$pid = \Resque::fork();
 				if($pid == -1)
 				{
-					return \Cli::error("Could not fork worker $i\n", "red");
-					$logger->log(\Monolog\Logger::EMERGENCY, 'Could not fork worker {count}', array('count' => $i));
+					return $logger->log(\Monolog\Logger::EMERGENCY, 'Could not fork worker {count}', array('count' => $i));
 				}
 				elseif( ! $pid)
 				{
 					$worker = new \Resque_Worker($queue);
 					$worker->setLogger($this->logger);
-					\Cli::write("*** Starting worker $worker\n", "green");
 					$this->logger->log(\Monolog\Logger::NOTICE, 'Starting worker {worker}', array('worker' => (string)$worker));
 					$worker->work((int) $interval, (bool) $blocking);
 					break;
@@ -86,7 +87,7 @@ class Resque
 		else
 		{
 			$worker = new \Resque_Worker($queue);
-			$worker->logLevel = $log;
+			$worker->setLogger($this->logger);
 
 			if ($pidfile)
 			{
@@ -94,7 +95,7 @@ class Resque
 					\Cli::write("*** Writing to PID file failed\n", "red");
 			}
 
-			\Cli::write("*** Starting worker $worker\n", "green");
+			$this->logger->log(\Monolog\Logger::NOTICE, 'Starting worker {worker}', array('worker' => (string)$worker));
 			$worker->work((int) $interval, (bool) $blocking);
 		}
 	}
@@ -109,10 +110,11 @@ class Resque
 			if ($worker instanceof \Resque_Worker)
 			{
 				$pid = explode(':', $worker);
-				\Cli::write("*** Stopping worker $worker\n", "red");
-				$this->logger->log(\Monolog\Logger::NOTICE, 'Stopping worker {worker} (Signal: {signal})', array('worker' => (string)$worker, 'signal' => $sig));
+				$this->logger->log(\Monolog\Logger::WARNING, 'Stopping worker {worker} (Signal: {signal})', array('worker' => (string)$worker, 'signal' => $sig));
 				posix_kill($pid[1], $sig);
+				$this->logger->log(\Monolog\Logger::NOTICE, 'Waiting for worker {worker} to stop', array('worker' => (string)$worker));
 				$worker->pruneDeadWorkers();
+				sleep(3);
 			}
 		}
 	}
@@ -153,49 +155,6 @@ class Resque
 			foreach ($jobs as $job)
 			{
 				\Cli::write($job['payload']['id'] . "\t" . $job["worker"] . "\t" . $job["queue"] . "\t\t" . $job['payload']['class'] . "\t" . json_encode($job['payload']['args']));
-			}
-		}
-	}
-
-	public function restart($workers = null)
-	{
-		$workers = $this->workers($workers);
-
-		$blocking = \Cli::option('blocking', \Cli::option('b', \Config::get('queue.blocking', false)));
-		$interval = \Cli::option('interval', \Cli::option('i', \Config::get('queue.interval', 5)));
-
-		$restart = array();
-		foreach ($workers as $worker)
-		{
-			if ($worker instanceof \Resque_Worker)
-			{
-				$pid = explode(':', $worker);
-				$restart[] = array(
-					'queues' => $worker->queues()
-				);
-
-				\Cli::write("*** Stopping worker $worker\n", "red");
-				posix_kill($pid[1], SIGQUIT);
-				$worker->pruneDeadWorkers();
-			}
-		}
-
-		foreach ($restart as $w)
-		{
-			$pid = \Resque::fork();
-			if($pid == -1)
-			{
-				return \Cli::error("Could not fork worker \n", "red");
-			}
-			// Child, start the worker
-			elseif( ! $pid)
-			{
-				$worker = new \Resque_Worker($w['queues']);
-				$worker->setLogger($this->logger);
-				\Cli::write("*** Starting worker $worker\n", "green");
-				$this->logger->log(\Monolog\Logger::NOTICE, 'Starting worker {worker}', array('worker' => (string)$worker));
-				$worker->work((int) $interval, (bool) $blocking);
-				break;
 			}
 		}
 	}
@@ -243,17 +202,18 @@ class Resque
 		if (is_null($workers)) {
 			$workers = \Resque_Worker::all();
 		}
+		elseif ($workers instanceof \Resque_Worker)
+		{
+			return array($workers);
+		}
+		elseif (\Resque_Worker::exists($workers))
+		{
+			$workers = array(\Resque_Worker::find($workers));
+		}
 		else
 		{
-			if (\Resque_Worker::exists($workers))
-			{
-				$workers = array(\Resque_Worker::find($workers));
-			}
-			else
-			{
-				\Cli::write("*** Worker $workers does not exists", "red");
-				exit(0);
-			}
+			\Cli::write("*** Worker $workers does not exists", "red");
+			exit(0);
 		}
 
 		if (empty($workers))
