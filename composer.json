@@ -12,7 +12,8 @@
 		}
 	],
 	"require": {
-		"composer/installers": "~1.0"
+		"composer/installers": "~1.0",
+		"indigo-soft/fuel-core": "dev-master"
 	},
 	"suggest": {
 		"chrisboulton/php-resque": "Used for Resque driver",
