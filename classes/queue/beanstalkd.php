@@ -28,7 +28,7 @@ class Queue_Beanstalkd extends Queue_Driver
 	 * @param	int		$priority	Job priority
 	 * @param	int		$delay		Delay
 	 * @param	int		$ttr		TTR
-	 * @return	mixed
+	 * @return	mixed				Job id
 	 */
 	protected function _push($job, array $args = array(), $priority = \Pheanstalk_PheanstalkInterface::DEFAULT_PRIORITY, $delay = \Pheanstalk_PheanstalkInterface::DEFAULT_DELAY, $ttr = \Pheanstalk_PheanstalkInterface::DEFAULT_TTR)
 	{
