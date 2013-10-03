@@ -1,4 +1,5 @@
-# Queue package
+Queue package
+=============
 
 Package to manage queues based on the well-known resque's php fork php-resque. Resque is a Redis-backed library for creating background job, placing them on multiple queues.
 

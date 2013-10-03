@@ -1,4 +1,14 @@
 <?php
+/**
+ * Fuel Queue
+ *
+ * @package 	Fuel
+ * @subpackage	Queue
+ * @version		1.0
+ * @author 		Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ * @license 	MIT License
+ * @link 		https://github.com/indigo-soft
+ */
 
 Config::load('queue', true);
 
