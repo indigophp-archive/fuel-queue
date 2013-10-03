@@ -55,10 +55,6 @@ class Worker_Beanstalkd extends Worker_Driver
 						$this->instance->delete($job);
 						$this->event->trigger('job_finish', array($j, $return));
 					}
-					catch (\WorkerStopJobException $e)
-					{
-						continue;
-					}
 					catch (\Exception $e)
 					{
 						$class->failure($e);
