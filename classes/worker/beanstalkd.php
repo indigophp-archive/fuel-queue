@@ -46,19 +46,20 @@ class Worker_Beanstalkd extends Worker_Driver
 				{
 					$j = json_decode($job->getData(), true);
 					$class = $j['job'];
-					$class = new $class();
-					$class->args=$j['args'];
+					$class = new $class($j['args']);
 
 					try
 					{
-						$class->before();
 						$class->run();
-						$class->after();
 						$this->instance->delete($job);
 					}
 					catch (\WorkerException $e)
 					{
 
+					}
+					catch (\Exception $e)
+					{
+						$class->failure($e);
 					}
 				}
 			}
