@@ -26,6 +26,8 @@ class Worker_Beanstalkd extends Worker_Driver
 		{
 			$this->instance->watch($queue);
 		}
+
+		$this->event =;
 	}
 
 	public function work()

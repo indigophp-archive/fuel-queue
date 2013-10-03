@@ -32,21 +32,3 @@ Autoloader::add_classes(array(
 	'Queue\\Queue_Beanstalkd'  => __DIR__ . '/classes/queue/beanstalkd.php',
 	'Queue\\Worker_Beanstalkd' => __DIR__ . '/classes/worker/beanstalkd.php',
 ));
-
-if (\Fuel::$is_cli)
-{
-	$event = \Event::instance('queue');
-
-	$event->register('resque_init', function(){
-		if (class_exists('\\Resque_Event'))
-		{
-			\Resque_Event::listen('onFailure', function($e, $job) {
-				if ($job instanceof \Resque_Job)
-				{
-					$instance = $job->getInstance();
-					$instance->failure($e);
-				}
-			});
-		}
-	});
-}
