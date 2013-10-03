@@ -26,8 +26,6 @@ class Worker_Beanstalkd extends Worker_Driver
 		{
 			$this->instance->watch($queue);
 		}
-
-		$this->event =;
 	}
 
 	public function work()
@@ -47,17 +45,19 @@ class Worker_Beanstalkd extends Worker_Driver
 				else
 				{
 					$j = json_decode($job->getData(), true);
+					$this->event->trigger('job_start', $j);
 					$class = $j['job'];
 					$class = new $class($j['args']);
 
 					try
 					{
-						$class->run();
+						$return = $class->run();
 						$this->instance->delete($job);
+						$this->event->trigger('job_finish', array($j, $return));
 					}
-					catch (\WorkerException $e)
+					catch (\WorkerStopJobException $e)
 					{
-
+						continue;
 					}
 					catch (\Exception $e)
 					{

@@ -22,6 +22,41 @@ class Worker_Resque extends Worker_Driver
 
 		$this->instance = new \Resque_Worker($this->get_config('queue', array('default')));
 		$this->instance->logLevel = $this->get_config('log', \Resque_Worker::LOG_NORMAL);
+
+		// Listen for failures and call the Job class failure method
+		\Resque_Event::listen('onFailure', function($e, $job) {
+			if ($job instanceof \Resque_Job)
+			{
+				$instance = $job->getInstance();
+				$instance->failure($e);
+			}
+		});
+
+		// Before PHP 5.4: $this cannot be used for anonymus functions
+		$event = $this->event;
+
+		// Listen for job events
+		\Resque_Event::listen('beforePerform', function($job) use($event) {
+			if ($job instanceof \Resque_Job)
+			{
+				$j = array(
+					'job'  => $job->payload['class'],
+					'args' => $job->getArguments()
+				);
+				$event->trigger('job_start', $j);
+			}
+		});
+
+		\Resque_Event::listen('afterPerform', function($job) use($event) {
+			if ($job instanceof \Resque_Job)
+			{
+				$j = array(
+					'job'  => $job->payload['class'],
+					'args' => $job->getArguments()
+				);
+				$event->trigger('job_finish', $j);
+			}
+		});
 	}
 
 	public function work()

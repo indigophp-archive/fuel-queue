@@ -30,6 +30,13 @@ abstract class Worker_Driver
 	protected $config = array();
 
 	/**
+	 * Event instance
+	 *
+	 * @var Event
+	 */
+	protected $event;
+
+	/**
 	* Driver constructor
 	*
 	* @param array $config driver config
@@ -37,7 +44,9 @@ abstract class Worker_Driver
 	final public function __construct(array $config = array())
 	{
 		$this->config = $config;
+		$this->event = \Event::instance('queue');
 		$this->_init();
+		$this->event->trigger('worker_init');
 	}
 
 	/**
