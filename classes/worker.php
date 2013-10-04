@@ -30,21 +30,23 @@ class Worker
 	 * @param	mixed			$config		Extra config array or the driver
 	 * @return  Worker instance
 	 */
-	public static function forge($setup = null, $config = array())
+	public static function forge($config = array())
 	{
-
-		empty($setup) and $setup = \Config::get('queue.default_setup', 'default');
-		is_string($setup) and $setup = \Config::get('queue.setups.'.$setup, array());
-
-		if ( ! empty($config) and ! is_array($config))
+		// When a string was passed it's just the setup
+		if (is_string($config))
 		{
-			$config = array('driver' => $config);
+			$setup = $config;
+			$config = array();
 		}
 
-		$setup = \Arr::merge(static::$_defaults, $setup);
-		$config = \Arr::merge($setup, $config);
+		// Get setup if not set, get it from config
+		empty($setup) and $setup = \Arr::get($config, 'setup', \Config::get('queue.default', 'default'));
 
-		! is_array($config['queue']) && $config['queue'] = explode(',', $config['queue']);
+		// Merge config and get driver
+		$config  = \Arr::merge(static::$_defaults, \Config::get('queue.setups.' . $setup, array()), $config);
+		$driver  = \Arr::get($config, 'driver');
+
+		is_array($config['queue']) or $config['queue'] = explode(',', $config['queue']);
 
 		$class = '\\Queue\\Worker_' . ucfirst(strtolower($config['driver']));
 

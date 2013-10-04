@@ -46,7 +46,7 @@ class Queue
 			return static::$_instances[$instance];
 		}
 
-		// When a string was passed it's just the driver type
+		// When a string was passed it's just the setup
 		if (is_string($config))
 		{
 			$setup = $config;
