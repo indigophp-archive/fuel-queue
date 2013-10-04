@@ -53,15 +53,16 @@ class Resque
 	 */
 	public function run()
 	{
-		$queue = explode(',', \Cli::option('queue', \Cli::option('q', 'default')));
+		$queue = func_get_args();
 		$blocking = \Cli::option('blocking', \Cli::option('b', \Config::get('queue.resque.blocking', false)));
 		$interval = \Cli::option('interval', \Cli::option('i', \Config::get('queue.resque.interval', 5)));
 		$count = \Cli::option('count', \Cli::option('c', \Config::get('queue.resque.count', 1)));
 		$pidfile = \Cli::option('pidfile');
 
-		if ( ! is_array($queue))
+		if (empty($queue))
 		{
-			return \Cli::error("Set --queue or -q parameter containing the list of queues to work.\n", "red");
+			$this->logger->log(\Monolog\Logger::ERROR, 'Pass a set of paramaters with the queue names');
+			exit(1);
 		}
 
 		// Fork workers or start a single one
@@ -92,7 +93,7 @@ class Resque
 			if ($pidfile)
 			{
 				file_put_contents($pidfile, getmypid()) ||
-					\Cli::write("*** Writing to PID file failed\n", "red");
+					$this->logger->log(\Monolog\Logger::WARNING, 'Writing to PID file {pidfile} failed', array('pidfile' => $pidfile));
 			}
 
 			$this->logger->log(\Monolog\Logger::NOTICE, 'Starting worker {worker}', array('worker' => (string)$worker));
@@ -104,7 +105,7 @@ class Resque
 	{
 		$workers = $this->workers($workers);
 		$sig = \Cli::option('sig', \Cli::option('s', SIGQUIT));
-		is_string($sig) && $sig = constant($sig);
+		filter_var($sig, FILTER_VALIDATE_INT) or $sig = constant($sig);
 
 		foreach ($workers as $worker) {
 			if ($worker instanceof \Resque_Worker)
@@ -112,13 +113,12 @@ class Resque
 				$pid = explode(':', $worker);
 				$this->logger->log(\Monolog\Logger::WARNING, 'Stopping worker {worker} (Signal: {signal})', array('worker' => (string)$worker, 'signal' => $sig));
 				posix_kill($pid[1], $sig);
-				$this->logger->log(\Monolog\Logger::NOTICE, 'Waiting for worker {worker} to stop', array('worker' => (string)$worker));
+				$worker->setLogger($this->logger);
 				$worker->pruneDeadWorkers();
 				sleep(3);
 			}
 		}
 	}
-
 
 	public function status($workers = null)
 	{
@@ -167,7 +167,7 @@ class Resque
 			if ($worker instanceof \Resque_Worker)
 			{
 				$pid = explode(':', $worker);
-				\Cli::write("*** Pause worker " . $worker, 'green');
+				$this->logger->log(\Monolog\Logger::NOTICE, 'Pause {worker}', array('worker' => (string)$worker));
 				posix_kill($pid[1], SIGUSR2);
 			}
 		}
@@ -181,7 +181,7 @@ class Resque
 			if ($worker instanceof \Resque_Worker)
 			{
 				$pid = explode(':', $worker);
-				\Cli::write("*** Unpause worker " . $worker, 'green');
+				$this->logger->log(\Monolog\Logger::NOTICE, 'Unpause {worker}', array('worker' => (string)$worker));
 				posix_kill($pid[1], SIGCONT);
 			}
 		}
@@ -199,12 +199,13 @@ class Resque
 
 	private function workers($workers = null)
 	{
-		if (is_null($workers)) {
-			$workers = \Resque_Worker::all();
-		}
-		elseif ($workers instanceof \Resque_Worker)
+		if ($workers instanceof \Resque_Worker)
 		{
 			return array($workers);
+		}
+		elseif (is_null($workers))
+		{
+			$workers = \Resque_Worker::all();
 		}
 		elseif (\Resque_Worker::exists($workers))
 		{
