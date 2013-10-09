@@ -21,7 +21,6 @@ class Worker_Resque extends Worker_Driver
 		\Resque_Redis::prefix($this->get_config('redis.prefix', 'fuel'));
 
 		$this->instance = new \Resque_Worker($this->get_config('queue', array('default')));
-		$this->instance->logLevel = $this->get_config('log', \Resque_Worker::LOG_NORMAL);
 
 		// Listen for failures and call the Job class failure method
 		\Resque_Event::listen('onFailure', function($e, $job) {
