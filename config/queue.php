@@ -27,53 +27,45 @@ return array(
 	'defaults' => array(
 
 		/**
-		 * Queue driver (direct, beanstalkd, resque)
+		 * Queue driver
 		 */
 		'driver' => 'beanstalkd',
 
 		/**
-		 * Default queues
+		 * Default queue
 		 */
-		'queue' => array('default'),
+		'queue' => 'default',
 
 		/**
-		 * Only enable queues given in the setup
+		 * Connection info
 		 */
-		'restrict_queue' => false,
+		'connection' => array(
+			/**
+			 * Queue host
+			 */
+			'host' => '127.0.0.1',
 
-		/**
-		 * Queue host
-		 */
-		'host' => '127.0.0.1',
+			/**
+			 * Queue port
+			 */
+			'port' => 11300,
 
-		/**
-		 * Queue port
-		 */
-		'port' => 11300,
-
-		/**
-		 * Max retry of a job
-		 */
-		'max_retry' => 5,
-
-		/**
-		 * Redis config
-		 */
-		'redis' => array(
-			'prefix' => 'fuel',
-			'db' => 0,
+			/**
+			 * Redis config
+			 */
+			'redis' => array(
+				'prefix' => 'fuel',
+				'db' => 0,
+			)
 		)
 	),
 
-	/**
-	 * Default setup group
-	 */
 	'default' => 'default',
 
 	/**
 	 * Setup groups
 	 */
-	'setups' => array(
+	'connections' => array(
 		'default' => array(),
 	)
 );

@@ -13,11 +13,10 @@
 	],
 	"require": {
 		"composer/installers": "~1.0",
-		"indigo-soft/fuel-core": "dev-master"
+		"indigo-soft/phresque": "dev-master"
 	},
 	"suggest": {
-		"chrisboulton/php-resque": "Used for Resque driver",
-		"pda/pheanstalk": "Used for Beanstalkd driver"
+		"indigo-soft/phresque": "dev-develop"
 	},
 	"extra": {
 		"installer-name": "queue"

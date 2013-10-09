@@ -43,7 +43,7 @@ class Queue
 	{
 		if (array_key_exists($queue, static::$_instances))
 		{
-			return static::$_instances[$instance];
+			return static::$_instances[$queue];
 		}
 
 		// When a string was passed it's just the setup
@@ -54,26 +54,25 @@ class Queue
 		}
 
 		// Get setup if not set, get it from config
-		empty($setup) and $setup = \Arr::get($config, 'setup', \Config::get('queue.default', 'default'));
+		empty($connection) and $connection = \Arr::get($config, 'connection', \Config::get('queue.default', 'default'));
 
 		// Merge config and get driver
-		$config  = \Arr::merge(static::$_defaults, \Config::get('queue.setups.' . $setup, array()), $config);
+		$config  = \Arr::merge(static::$_defaults, \Config::get('queue.connections.' . $connection, array()), $config);
 		$driver  = \Arr::get($config, 'driver');
 
-		$class = '\\Queue\\Queue_' . ucfirst(strtolower($driver));
+		// Check driver availability
+		$class = '\\Phresque\\Queue\\' . ucfirst(strtolower($driver)) . 'Queue';
 
 		if( ! class_exists($class, true))
 		{
 			throw new \QueueException('Could not find Queue driver: ' . $driver);
 		}
 
-		// Restrict queue passed to be in config
-		if((\Arr::get($config, 'restrict_queue') === true and ! in_array($queue, \Arr::get($config, 'queue'))) and ! in_array('*', $config['queue']))
-		{
-			throw new \QueueException($queue . ' is not part of this setup.');
-		}
+		// Instantiate queue
+		$driver = new $class($queue, $config['connection']);
 
-		$driver = new $class($queue, $config);
+		// Fallback to direct driver
+		$driver->isAvailable() or $driver = new DirectQueue();
 
 		static::$_instances[$queue] = $driver;
 
@@ -91,14 +90,16 @@ class Queue
 	/**
 	 * Push a job from static interface
 	 *
+	 * @param	string	$queue	queue name
 	 * @param	string	$job	Job name
 	 * @param	array	$args	Optional array of arguments
-	 * @param	string	$queue	Optional queue name
 	 * @return	string			Job token
 	 */
-	public static function push($job, array $args = array(), $queue = 'default')
+	public static function push($queue, $job, array $data = array())
 	{
-		return static::instance($queue)->enqueue($job, $args);
+		$args = func_get_args() and array_shift($args);
+		$callable = array(static::instance($queue), 'push');
+		return call_user_func_array($callable, $args);
 	}
 
 	/**
