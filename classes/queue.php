@@ -90,15 +90,21 @@ class Queue
 	/**
 	 * Push a job from static interface
 	 *
-	 * @param	string	$queue	queue name
+	 * @param	mixed	$queue	queue name or array of queue name and config
 	 * @param	string	$job	Job name
 	 * @param	array	$args	Optional array of arguments
 	 * @return	string			Job token
 	 */
-	public static function push($queue, $job, array $data = array())
+	public static function push($queue, $job, $data = array())
 	{
+		// Get args that will be pushed to the queue drivers
 		$args = func_get_args() and array_shift($args);
-		$callable = array(static::instance($queue), 'push');
+
+		// Queue is an array, so it also contains config
+		is_array($queue) ? list($queue, $config) = $queue : $config = array();
+
+		// Call instance
+		$callable = array(static::instance($queue, $config), 'push');
 		return call_user_func_array($callable, $args);
 	}
 
