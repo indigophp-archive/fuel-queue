@@ -19,19 +19,27 @@ class Queue
 		$handler->setFormatter($formatter);
 		$logger->pushHandler($handler);
 
-		// Console handler
-		$handler = new \Monolog\Handler\ConsoleHandler(\Monolog\Logger::NOTICE);
-		$formatter = new \Monolog\Formatter\LineFormatter("%message% - %context%".PHP_EOL, "Y-m-d H:i:s");
-		$handler->setFormatter($formatter);
-		$logger->pushHandler($handler);
 
+		// Only log to console when it is enabled
+		$console = \Cli::option('c', false);
+
+		if ($console)
+		{
+			// Console handler
+			$handler = new \Monolog\Handler\ConsoleHandler(\Monolog\Logger::NOTICE);
+			$formatter = new \Monolog\Formatter\ContextLineFormatter("%level_name% --> %message% - %context%".PHP_EOL, "Y-m-d H:i:s");
+			$handler->setFormatter($formatter);
+			$logger->pushHandler($handler);
+		}
+
+		// Add other handlers to logger through Event trigger
 		\Event::instance('queue')->trigger('logger', $logger);
 
 		$this->logger = $logger;
 
 		// Register shutdown function to catch exit
 		\Event::register('shutdown', function() use($logger) {
-			$logger->log(\Monolog\Logger::WARNING, 'Worker {pid} is stopping', array('pid' => getmypid()));
+			$logger->warning('Worker {pid} is stopping', array('pid' => getmypid()));
 		});
 	}
 
