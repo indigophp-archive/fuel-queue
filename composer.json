@@ -2,7 +2,7 @@
 	"name": "indigo-soft/fuel-queue",
 	"type": "fuel-package",
 	"description": "Queue package",
-	"keywords": ["redis", "resque", "beanstalkd", "queue"],
+	"keywords": ["redis", "resque", "beanstalkd", "queue", "job", "worker", "phresque"],
 	"homepage": "https://github.com/indigo-soft",
 	"license": "MIT",
 	"authors": [
@@ -14,9 +14,6 @@
 	"require": {
 		"composer/installers": "~1.0",
 		"indigo-soft/phresque": "dev-master"
-	},
-	"suggest": {
-		"indigo-soft/phresque": "dev-develop"
 	},
 	"extra": {
 		"installer-name": "queue"
