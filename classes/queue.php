@@ -1,4 +1,14 @@
 <?php
+/**
+ * Fuel Queue
+ *
+ * @package 	Fuel
+ * @subpackage	Queue
+ * @version		1.0
+ * @author 		Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ * @license 	MIT License
+ * @link 		https://github.com/indigo-soft
+ */
 
 namespace Queue;
 
@@ -8,12 +18,15 @@ class Queue
 {
 
 	/**
-	 * array of loaded instances
+	 * Loaded instances
+	 *
+	 * @var array
 	 */
 	protected static $_instances = array();
 
 	/**
 	 * Default config
+	 *
 	 * @var array
 	 */
 	protected static $_defaults;
@@ -21,45 +34,51 @@ class Queue
 	/**
 	 * Queue driver instance.
 	 *
-	 * @param	string			$queue		Queue name
-	 * @param	mixed			$setup		Setup name or extra config
-	 * @param	mixed			$config		Extra config array
-	 * @return  Queue instance
+	 * @param	string		$queue		Queue name
+	 * @param	mixed		$setup		Setup name or extra config
+	 * @param	mixed		$config		Extra config array
+	 * @return	object		new Queue_Driver
 	 */
-	public static function instance($queue = 'default', $setup = null, $config = array())
+	public static function instance($queue = 'default', $config = array())
 	{
+		// Return instance if exists
 		if (array_key_exists($queue, static::$_instances))
 		{
-			return static::$_instances[$instance];
+			return static::$_instances[$queue];
 		}
 
-		if(is_array($setup))
+		// When a string was passed it's just the setup
+		if (is_string($config))
 		{
-			$config = \Arr::merge($setup, $config);
-			$setup = null;
+			$setup = $config;
+			$config = array();
 		}
 
-		empty($setup) and $setup = \Config::get('queue.default_setup', 'default');
-		is_string($setup) and $setup = \Config::get('queue.setups.'.$setup, array());
+		// Get setup if not set, get it from config
+		empty($connection) and $connection = \Arr::get($config, 'connection', \Config::get('queue.default', 'default'));
 
-		$setup = \Arr::merge(static::$_defaults, $setup);
-		$config = \Arr::merge($setup, $config);
+		// Merge config and get driver
+		$config  = \Arr::merge(static::$_defaults, \Config::get('queue.connections.' . $connection, array()), $config);
+		$driver  = \Arr::get($config, 'driver');
 
-		$class = '\\Queue\\Queue_' . ucfirst(strtolower($config['driver']));
+		// Check driver availability
+		$class = '\\Phresque\\Queue\\' . ucfirst(strtolower($driver)) . 'Queue';
 
 		if( ! class_exists($class, true))
 		{
-			throw new \QueueException('Could not find Queue driver: ' . $config['driver']);
+			throw new \QueueException('Could not find Queue driver: ' . $driver);
 		}
 
-		if(($config['restrict_queue'] === true && ! in_array($queue, $config['queue'])) && ! in_array('*', $config['queue']))
-		{
-			throw new \QueueException($queue . ' is not part of this setup.');
-		}
+		// Instantiate queue
+		$driver = new $class($queue, $config['connection']);
 
-		$driver = new $class($queue, $config);
+		// Fallback to direct driver
+		$driver->isAvailable() or $driver = new DirectQueue();
 
-		static::$_instances[$queue] =& $driver;
+		// Set logger instance
+		$driver->setLogger(\Arr::get($config, 'logger', \Log::instance()));
+
+		static::$_instances[$queue] = $driver;
 
 		return static::$_instances[$queue];
 	}
@@ -74,14 +93,23 @@ class Queue
 
 	/**
 	 * Push a job from static interface
-	 * @param  string $job   Job name
-	 * @param  array $args  Optional array of arguments
-	 * @param  string $queue Optional queue name
-	 * @return string        Job token
+	 *
+	 * @param	mixed	$queue	queue name or array of queue name and config
+	 * @param	string	$job	Job name
+	 * @param	array	$args	Optional array of arguments
+	 * @return	string			Job token
 	 */
-	public static function push($job, array $args = array(), $queue = 'default')
+	public static function push($queue, $job, $data = array())
 	{
-		return static::instance($queue)->enqueue($job, $args);
+		// Get args that will be pushed to the queue drivers
+		$args = func_get_args() and array_shift($args);
+
+		// Queue is an array, so it also contains config
+		is_array($queue) ? list($queue, $config) = $queue : $config = array();
+
+		// Call instance
+		$callable = array(static::instance($queue, $config), 'push');
+		return call_user_func_array($callable, $args);
 	}
 
 	/**
