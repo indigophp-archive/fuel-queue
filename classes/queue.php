@@ -74,6 +74,8 @@ class Queue
 		// Fallback to direct driver
 		$driver->isAvailable() or $driver = new DirectQueue();
 
+		$driver->setLogger(\Arr::get($config, 'logger', \Log::instance()));
+
 		static::$_instances[$queue] = $driver;
 
 		return static::$_instances[$queue];

@@ -15,15 +15,17 @@ class Queue
 
 		// Get original handler
 		$handler = $logger->popHandler();
-		$formatter = new \Monolog\Formatter\ContextLineFormatter("%level_name% - %datetime% --> %message%".PHP_EOL, "Y-m-d H:i:s");
+		$formatter = new \Monolog\Formatter\ContextLineFormatter("%level_name% - %datetime% --> %message% - %context%".PHP_EOL, "Y-m-d H:i:s");
 		$handler->setFormatter($formatter);
 		$logger->pushHandler($handler);
 
 		// Console handler
 		$handler = new \Monolog\Handler\ConsoleHandler(\Monolog\Logger::NOTICE);
-		$formatter = new \Monolog\Formatter\ContextLineFormatter("%message%".PHP_EOL, "Y-m-d H:i:s");
+		$formatter = new \Monolog\Formatter\LineFormatter("%message% - %context%".PHP_EOL, "Y-m-d H:i:s");
 		$handler->setFormatter($formatter);
 		$logger->pushHandler($handler);
+
+		\Event::instance('queue')->trigger('logger', $logger);
 
 		$this->logger = $logger;
 
