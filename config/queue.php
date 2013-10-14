@@ -49,14 +49,6 @@ return array(
 			 * Queue port
 			 */
 			'port' => 11300,
-
-			/**
-			 * Redis config
-			 */
-			'redis' => array(
-				'prefix' => 'fuel',
-				'db' => 0,
-			)
 		)
 	),
 
