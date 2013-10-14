@@ -41,6 +41,7 @@ class Queue
 	 */
 	public static function instance($queue = 'default', $config = array())
 	{
+		// Return instance if exists
 		if (array_key_exists($queue, static::$_instances))
 		{
 			return static::$_instances[$queue];
@@ -74,6 +75,7 @@ class Queue
 		// Fallback to direct driver
 		$driver->isAvailable() or $driver = new DirectQueue();
 
+		// Set logger instance
 		$driver->setLogger(\Arr::get($config, 'logger', \Log::instance()));
 
 		static::$_instances[$queue] = $driver;
