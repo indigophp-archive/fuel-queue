@@ -52,9 +52,6 @@ class Queue
 		$this->shutdown = function() use($logger) {
 			$logger->warning('Worker {pid} is stopping', array('pid' => getmypid()));
 		};
-
-		// Register shutdown function to catch exit
-		\Event::register('shutdown', $this->shutdown);
 	}
 
 	public function run($connection = 'default')
@@ -69,18 +66,26 @@ class Queue
 
 		$worker = new Worker($config['queue'], $config['driver'], $config['connection']);
 		$worker->setLogger($this->logger);
-		$work = \Cli::option('work', \Cli::option('w', false));
 
-		if ($work)
-		{
-			$worker->work();
+		// Register shutdown function to catch exit
+		\Event::register('shutdown', $this->shutdown);
 
-			// Unregister shutdown function to catch exit
-			\Event::unregister('shutdown', $this->shutdown);
-		}
-		else
-		{
-			$worker->listen();
-		}
+		$worker->listen();
+	}
+
+	public function work($connection = 'default')
+	{
+		$queue = \Cli::option('queue', \Cli::option('q'));
+		$driver = \Cli::option('driver', \Cli::option('d'));
+
+		$config = \Arr::merge(\Config::get('queue.defaults'), \Config::get('queue.connections.' . $connection, array()));
+
+		is_null($queue) or $config['queue'] = $queue;
+		is_null($driver) or $config['driver'] = $driver;
+
+		$worker = new Worker($config['queue'], $config['driver'], $config['connection']);
+		$worker->setLogger($this->logger);
+
+		$worker->work();
 	}
 }
