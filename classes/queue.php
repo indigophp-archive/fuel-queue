@@ -73,7 +73,7 @@ class Queue
 		$driver = new $class($queue, $config['connection']);
 
 		// Fallback to direct driver
-		$driver->isAvailable() or $driver = new DirectQueue();
+		$driver->isAvailable() or $driver = new \Phresque\Queue\DirectQueue();
 
 		// Set logger instance
 		$driver->setLogger(\Arr::get($config, 'logger', \Log::instance()));
