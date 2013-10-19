@@ -1,7 +1,7 @@
 {
 	"name": "indigo-soft/fuel-queue",
 	"type": "fuel-package",
-	"description": "Queue package",
+	"description": "Fuel Queue package",
 	"keywords": ["redis", "resque", "beanstalkd", "queue", "job", "worker", "phresque"],
 	"homepage": "https://github.com/indigo-soft",
 	"license": "MIT",
