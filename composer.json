@@ -13,7 +13,7 @@
 	],
 	"require": {
 		"composer/installers": "~1.0",
-		"indigo-soft/phresque": "dev-master"
+		"indigo-soft/phresque": "dev-develop"
 	},
 	"extra": {
 		"installer-name": "queue"
