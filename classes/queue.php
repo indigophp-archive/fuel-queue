@@ -116,9 +116,9 @@ class Queue
 	/**
 	 * Push a job from static interface
 	 *
-	 * @param	mixed	$queue	queue name or array of queue name and config
+	 * @param	mixed	$queue	Queue name or array of queue name and config or QueueInterface
 	 * @param	string	$job	Job name
-	 * @param	array	$args	Optional array of arguments
+	 * @param	array	$data	Optional array of arguments
 	 * @return	string			Job token
 	 */
 	public static function push($queue, $job, $data = array())
@@ -136,6 +136,33 @@ class Queue
 
 		// Call instance
 		$callable = array($queue, 'push');
+		return call_user_func_array($callable, $args);
+	}
+
+	/**
+	 * Push a delayed job from static interface
+	 *
+	 * @param	mixed	$queue	Queue name or array of queue name and config or QueueInterface
+	 * @param	integer	$delay	Seconds the job should be delayed
+	 * @param	string	$job	Job name
+	 * @param	array	$data	Optional array of arguments
+	 * @return	string			Job token
+	 */
+	public static function later($queue, $delay, $job, $data = array())
+	{
+		// Get args that will be pushed to the queue drivers
+		$args = func_get_args() and array_shift($args);
+
+		// No QueueInterface passed
+		if ( ! $queue instanceof QueueInterface)
+		{
+			// Queue is an array, so it also contains config
+			is_array($queue) ? list($queue, $config) = $queue : $config = array();
+			$queue = static::instance($queue, $config);
+		}
+
+		// Call instance
+		$callable = array($queue, 'later');
 		return call_user_func_array($callable, $args);
 	}
 
