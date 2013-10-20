@@ -52,7 +52,13 @@ class Queue
 		};
 	}
 
-	public function run($queue = 'default')
+	/**
+	 * Resolve worker
+	 *
+	 * @param	mixed	$queue
+	 * @return	Worker
+	 */
+	protected function _resolve($queue)
 	{
 		$config = array();
 
@@ -61,8 +67,18 @@ class Queue
 
 		$queue = \Queue::instance($queue, $config);
 
-		$worker = new Worker($queue);
-		$worker->setLogger($this->logger);
+		return new Worker($queue, $this->logger);
+	}
+
+	/**
+	 * Listen to queue
+	 *
+	 * @param	mixed	$queue
+	 * @return	null
+	 */
+	public function run($queue = 'default')
+	{
+		$worker = $this->_resolve($queue);
 
 		// Register shutdown function to catch exit
 		\Event::register('shutdown', $this->shutdown);
@@ -70,17 +86,15 @@ class Queue
 		$worker->listen();
 	}
 
+	/**
+	 * Process a job from a queue
+	 *
+	 * @param	mixed	$queue
+	 * @return	null
+	 */
 	public function work($queue = 'default')
 	{
-		$config = array();
-
-		$driver = \Cli::option('driver', \Cli::option('d'));
-		is_null($driver) or $config['driver'] = $driver;
-
-		$queue = \Queue::instance($queue, $config);
-
-		$worker = new Worker($queue);
-		$worker->setLogger($this->logger);
+		$worker = $this->_resolve($queue);
 
 		$worker->work();
 	}
