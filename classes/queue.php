@@ -148,7 +148,7 @@ class Queue
 	 * @param	array	$data	Optional array of arguments
 	 * @return	string			Job token
 	 */
-	public static function later($queue, $delay, $job, $data = array())
+	public static function delayed($queue, $delay, $job, $data = array())
 	{
 		// Get args that will be pushed to the queue drivers
 		$args = func_get_args() and array_shift($args);
@@ -162,7 +162,7 @@ class Queue
 		}
 
 		// Call instance
-		$callable = array($queue, 'later');
+		$callable = array($queue, 'delayed');
 		return call_user_func_array($callable, $args);
 	}
 
