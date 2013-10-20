@@ -67,6 +67,11 @@ class Queue
 
 		$queue = \Queue::instance($queue, $config);
 
+		if ($queue instanceof \Phresque\Queue\DirectQueue)
+		{
+			throw new \QueueException('DirectQueue should not have any listeners or worker instances');
+		}
+
 		return new Worker($queue, $this->logger);
 	}
 
