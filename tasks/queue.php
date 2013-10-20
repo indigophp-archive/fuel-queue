@@ -38,7 +38,7 @@ class Queue
 		if ($console)
 		{
 			// Console handler
-			$handler = new \Monolog\Handler\ConsoleHandler(\Monolog\Logger::NOTICE);
+			$handler = new \Monolog\Handler\ConsoleHandler(\Monolog\Logger::DEBUG);
 			$formatter = new \Monolog\Formatter\ContextLineFormatter("%level_name% --> %message% - %context%".PHP_EOL, "Y-m-d H:i:s");
 			$handler->setFormatter($formatter);
 			$logger->pushHandler($handler);
