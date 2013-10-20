@@ -54,17 +54,16 @@ class Queue
 		};
 	}
 
-	public function run($connection = 'default')
+	public function run($queue = 'default')
 	{
-		$queue = \Cli::option('queue', \Cli::option('q'));
+		$config = array();
+
 		$driver = \Cli::option('driver', \Cli::option('d'));
-
-		$config = \Arr::merge(\Config::get('queue.defaults'), \Config::get('queue.connections.' . $connection, array()));
-
-		is_null($queue) or $config['queue'] = $queue;
 		is_null($driver) or $config['driver'] = $driver;
 
-		$worker = new Worker($config['queue'], $config['driver'], $config['connection']);
+		$queue = \Queue::instance($queue, $config);
+
+		$worker = new Worker($queue);
 		$worker->setLogger($this->logger);
 
 		// Register shutdown function to catch exit
@@ -73,17 +72,16 @@ class Queue
 		$worker->listen();
 	}
 
-	public function work($connection = 'default')
+	public function work($queue = 'default')
 	{
-		$queue = \Cli::option('queue', \Cli::option('q'));
+		$config = array();
+
 		$driver = \Cli::option('driver', \Cli::option('d'));
-
-		$config = \Arr::merge(\Config::get('queue.defaults'), \Config::get('queue.connections.' . $connection, array()));
-
-		is_null($queue) or $config['queue'] = $queue;
 		is_null($driver) or $config['driver'] = $driver;
 
-		$worker = new Worker($config['queue'], $config['driver'], $config['connection']);
+		$queue = \Queue::instance($queue, $config);
+
+		$worker = new Worker($queue);
 		$worker->setLogger($this->logger);
 
 		$worker->work();

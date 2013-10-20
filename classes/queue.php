@@ -12,6 +12,10 @@
 
 namespace Queue;
 
+use Phresque\Queue\QueueInterface;
+use Phresque\Queue\DirectQueue;
+use Psr\Log\LoggerInterface;
+
 class QueueException extends \FuelException {}
 
 class Queue
@@ -29,58 +33,65 @@ class Queue
 	 *
 	 * @var array
 	 */
-	protected static $_defaults;
+	protected static $_defaults = array(
+		'driver' => 'direct',
+		'auto'   => false,
+		'connection' => array(
+			'host' => '127.0.0.1',
+			'port' => 11300,
+		)
+	);
 
 	/**
 	 * Queue driver instance.
 	 *
-	 * @param	string		$queue		Queue name
-	 * @param	mixed		$setup		Setup name or extra config
+	 * @param	mixed		$queue		Queue name
 	 * @param	mixed		$config		Extra config array
-	 * @return	object		new Queue_Driver
+	 * @return	QueueInterface
 	 */
-	public static function instance($queue = 'default', $config = array())
+	public static function instance($queue = 'default', array $config = array())
 	{
-		// Return instance if exists
-		if (array_key_exists($queue, static::$_instances))
+		// Set instance if QueueInterface passed
+		// or return existing instance
+		// or instantiate class
+		if ($queue instanceof QueueInterface)
+		{
+			$driver = $queue;
+			$queue  = $driver->getQueue();
+		}
+		elseif (array_key_exists($queue, static::$_instances))
 		{
 			return static::$_instances[$queue];
 		}
-
-		// When a string was passed it's just the setup
-		if (is_string($config))
+		else
 		{
-			$setup = $config;
-			$config = array();
+			// Merge configs and get driver
+			$config = \Arr::merge(static::$_defaults, \Config::get('queue.queues.' . $queue, array()), $config);
+			$driver = \Arr::get($config, 'driver', 'direct');
+
+			if ( ! $driver instanceof QueueInterface)
+			{
+				// Check driver availability
+				class_exists($driver) or $driver = '\\Phresque\\Queue\\' . ucfirst(strtolower($driver)) . 'Queue';
+
+				if( ! class_exists($driver))
+				{
+					throw new \QueueException('Could not find Queue driver: ' . $driver);
+				}
+
+				// Instantiate queue
+				$driver = new $driver($queue, \Arr::get($config, 'connection', array()));
+			}
 		}
-
-		// Get setup if not set, get it from config
-		empty($connection) and $connection = \Arr::get($config, 'connection', \Config::get('queue.default', 'default'));
-
-		// Merge config and get driver
-		$config  = \Arr::merge(static::$_defaults, \Config::get('queue.connections.' . $connection, array()), $config);
-		$driver  = \Arr::get($config, 'driver');
-
-		// Check driver availability
-		$class = '\\Phresque\\Queue\\' . ucfirst(strtolower($driver)) . 'Queue';
-
-		if( ! class_exists($class, true))
-		{
-			throw new \QueueException('Could not find Queue driver: ' . $driver);
-		}
-
-		// Instantiate queue
-		$driver = new $class($queue, $config['connection']);
 
 		// Fallback to direct driver
-		$driver->isAvailable() or $driver = new \Phresque\Queue\DirectQueue();
+		$driver->isAvailable() or $driver = new DirectQueue();
 
 		// Set logger instance
 		$driver->setLogger(\Arr::get($config, 'logger', \Log::instance()));
 
-		static::$_instances[$queue] = $driver;
-
-		return static::$_instances[$queue];
+		// Return queue instance
+		return static::$_instances[$queue] = $driver;
 	}
 
 	/**
@@ -88,7 +99,18 @@ class Queue
 	 */
 	public static function _init()
 	{
-		static::$_defaults = \Config::get('queue.defaults');
+		// Load config and defaults
+		\Config::load('queue', true);
+		static::$_defaults = \Arr::merge(static::$_defaults, \Config::get('queue.defaults', array()));
+
+		// Get defined queues for autoload
+		$auto = \Config::get('queue.queues', array());
+
+		foreach ($auto as $queue => $config)
+		{
+			// Autoload some queues
+			\Arr::get($config, 'auto', false) === true and static::instance($queue);
+		}
 	}
 
 	/**
@@ -104,11 +126,16 @@ class Queue
 		// Get args that will be pushed to the queue drivers
 		$args = func_get_args() and array_shift($args);
 
-		// Queue is an array, so it also contains config
-		is_array($queue) ? list($queue, $config) = $queue : $config = array();
+		// No QueueInterface passed
+		if ( ! $queue instanceof QueueInterface)
+		{
+			// Queue is an array, so it also contains config
+			is_array($queue) ? list($queue, $config) = $queue : $config = array();
+			$queue = static::instance($queue, $config);
+		}
 
 		// Call instance
-		$callable = array(static::instance($queue, $config), 'push');
+		$callable = array($queue, 'push');
 		return call_user_func_array($callable, $args);
 	}
 
