@@ -33,11 +33,8 @@ class Queue
 
 
 		// Only log to console when it is enabled
-		$console = \Cli::option('c', false);
-
-		if ($console)
+		if (\Cli::option('c', false) === true)
 		{
-			// Console handler
 			$handler = new \Monolog\Handler\ConsoleHandler(\Monolog\Logger::DEBUG);
 			$formatter = new \Monolog\Formatter\ContextLineFormatter("%level_name% --> %message% - %context%".PHP_EOL, "Y-m-d H:i:s");
 			$handler->setFormatter($formatter);
@@ -49,8 +46,9 @@ class Queue
 
 		$this->logger = $logger;
 
+		// Listener should not simply stop
 		$this->shutdown = function() use($logger) {
-			$logger->warning('Worker {pid} is stopping', array('pid' => getmypid()));
+			$logger->info('Worker {pid} is stopping', array('pid' => getmypid()));
 		};
 	}
 
