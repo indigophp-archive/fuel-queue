@@ -88,7 +88,10 @@ class Queue
 		// Register shutdown function to catch exit
 		\Event::register('shutdown', $this->shutdown);
 
-		$worker->listen();
+		$interval = \Cli::option('interval', \Cli::option('i', 5));
+		$memory = \Cli::option('memory', \Cli::option('m', null));
+
+		$worker->listen($interval, $memory);
 	}
 
 	/**
