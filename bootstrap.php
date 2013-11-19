@@ -10,8 +10,6 @@
  * @link 		https://github.com/indigo-soft
  */
 
-Config::load('queue', true);
-
 Autoloader::add_core_namespace('Queue');
 
 Autoloader::add_classes(array(

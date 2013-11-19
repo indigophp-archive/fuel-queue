@@ -29,12 +29,12 @@ return array(
 		/**
 		 * Queue driver
 		 */
-		'driver' => 'beanstalkd',
+		'driver' => 'direct',
 
 		/**
-		 * Default queue
+		 * Auto initialize queue
 		 */
-		'queue' => 'default',
+		'auto' => false,
 
 		/**
 		 * Connection info
@@ -51,13 +51,10 @@ return array(
 			'port' => 11300,
 		)
 	),
-
-	'default' => 'default',
-
 	/**
-	 * Setup groups
+	 * Queues
 	 */
-	'connections' => array(
+	'queues' => array(
 		'default' => array(),
 	)
 );
