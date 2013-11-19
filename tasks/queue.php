@@ -25,18 +25,15 @@ class Queue
 		// Initialize logger
 		$logger = clone \Log::instance();
 
-		// Get original handler
-		$handler = $logger->popHandler();
-		$formatter = new \Monolog\Formatter\ContextLineFormatter("%level_name% - %datetime% --> %message% - %context%".PHP_EOL, "Y-m-d H:i:s");
-		$handler->setFormatter($formatter);
-		$logger->pushHandler($handler);
-
+		// Process context in message
+		$processor = new \Monolog\Processor\PsrLogMessageProcessor();
+		$logger->pushProcessor($processor);
 
 		// Only log to console when it is enabled
 		if (\Cli::option('c', false) === true)
 		{
 			$handler = new \Monolog\Handler\ConsoleHandler(\Monolog\Logger::DEBUG);
-			$formatter = new \Monolog\Formatter\ContextLineFormatter("%level_name% --> %message% - %context%".PHP_EOL, "Y-m-d H:i:s");
+			$formatter = new \Monolog\Formatter\LineFormatter("%level_name% --> %message%".PHP_EOL, "Y-m-d H:i:s");
 			$handler->setFormatter($formatter);
 			$logger->pushHandler($handler);
 		}
