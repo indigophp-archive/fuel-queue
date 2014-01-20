@@ -2,14 +2,14 @@
 
 namespace Fuel\Tasks;
 
-use \Phresque\Worker;
+use Indigo\Queue\Worker;
 
 class Queue
 {
 	/**
 	 * Logger instance
 	 *
-	 * @var \Psr\Log\LoggerInterface
+	 * @var Psr\Log\LoggerInterface
 	 */
 	protected $logger;
 
@@ -45,7 +45,8 @@ class Queue
 
 		// Listener should not simply stop
 		$this->shutdown = function() use($logger) {
-			$logger->info('Worker {pid} is stopping', array('pid' => getmypid()));
+			$pid = getmypid();
+			$logger->info('Worker ' . $pid . ' is stopping', compact('pid'));
 		};
 	}
 
@@ -57,26 +58,15 @@ class Queue
 	 */
 	protected function _resolve($queue)
 	{
-		$config = array();
+		$connector = \Queue::instance($queue)->getConnector();
 
-		$driver = \Cli::option('driver', \Cli::option('d'));
-		is_null($driver) or $config['driver'] = $driver;
-
-		$queue = \Queue::instance($queue, $config);
-
-		if ($queue instanceof \Phresque\Queue\DirectQueue)
-		{
-			throw new \QueueException('DirectQueue should not have any listeners or worker instances');
-		}
-
-		return new Worker($queue, $this->logger);
+		return new Worker($queue, $connector);
 	}
 
 	/**
 	 * Listen to queue
 	 *
 	 * @param	mixed	$queue
-	 * @return	null
 	 */
 	public function run($queue = 'default')
 	{
@@ -86,16 +76,14 @@ class Queue
 		\Event::register('shutdown', $this->shutdown);
 
 		$interval = \Cli::option('interval', \Cli::option('i', 5));
-		$memory = \Cli::option('memory', \Cli::option('m', null));
 
-		$worker->listen($interval, $memory);
+		$worker->listen($interval);
 	}
 
 	/**
 	 * Process a job from a queue
 	 *
 	 * @param	mixed	$queue
-	 * @return	null
 	 */
 	public function work($queue = 'default')
 	{
