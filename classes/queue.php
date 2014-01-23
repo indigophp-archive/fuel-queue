@@ -13,74 +13,84 @@
 namespace Queue;
 
 use Indigo\Queue\Connector\ConnectorInterface;
-use Indigo\Queue\Queue;
 
 class Queue
 {
-    /**
-     * Array of ConnectorInterface instances
-     *
-     * @var array
-     */
-    protected static $_instances = array();
+	/**
+	 * Array of Queue instances
+	 *
+	 * @var array
+	 */
+	protected static $_instances = array();
 
-    /**
-     * Init
-     */
-    public static function _init()
-    {
-        \Config::load('queue', true);
-    }
+	/**
+	 * Init
+	 */
+	public static function _init()
+	{
+		\Config::load('queue', true);
+	}
 
-    /**
-     * Forge and return new instance
-     *
-     * @param  string             $queue    Queue name
-     * @param  string             $instance Instance name
-     * @param  ConnectorInterface $object   Object instance if not exists
-     * @return Queue
-     */
-    public static function forge($queue, $instance = null, ConnectorInterface $object = null)
-    {
-        is_null($instance) and $instance = \Config::get('queue.default');
-        is_null($object) and $object = \Config::get('queue.instances.' . $instance);
+	/**
+	 * Forge and return new instance
+	 *
+	 * @param  string $queue     Queue name
+	 * @param  string $connector Connector name
+	 * @return Queue
+	 */
+	public static function forge($queue, $connector = null)
+	{
+		if (is_null($connector))
+		{
+			$connector = \Config::get('queue.queue.' . $queue);
 
-        if (is_null($object) or ! $object instanceof ConnectorInterface)
-        {
-            throw new \InvalidArgumentException('There is no valid Connector object');
-        }
+			// ConnectorInterface injected here
+			if ( ! $connector instanceof ConnectorInterface)
+			{
+				// Queue is not found or set to null: default
+				is_null($connector) and $connector = \Config::get('queue.default');
 
-        $object = new Queue($queue, $object);
+				$connector = \Config::get('queue.connector.' . $connector);
+			}
+		}
 
-        return static::$_instances[$instance] = $object;
-    }
+		if ( ! $connector instanceof ConnectorInterface)
+		{
+			throw new \InvalidArgumentException('There is no valid Connector');
+		}
 
-    /**
-     * Return or forge an instance
-     *
-     * @param  string $instance Instance name
-     * @return ConnectorInterface
-     */
-    public static function instance($instance = null)
-    {
-        if (array_key_exists($instance, static::$_instances))
-        {
-            $instance = static::$_instances[$instance];
-        }
-        else
-        {
-            $instance = static::forge($instance);
-        }
+		$instance = new \Indigo\Queue\Queue($queue, $connector);
+		$instance->setLogger(\Log::instance());
 
-        return $instance;
-    }
+		return static::$_instances[$queue] = $instance;
+	}
 
-    /**
-     * class constructor
-     *
-     * @param   void
-     * @access  private
-     * @return  void
-     */
-    final private function __construct() {}
+	/**
+	 * Return a queue instance
+	 *
+	 * @param  string $queue Queue name
+	 * @return ConnectorInterface
+	 */
+	public static function instance($queue = null)
+	{
+		if (array_key_exists($queue, static::$_instances))
+		{
+			$queue = static::$_instances[$queue];
+		}
+		else
+		{
+			$queue = static::forge($queue);
+		}
+
+		return $queue;
+	}
+
+	/**
+	 * class constructor
+	 *
+	 * @param   void
+	 * @access  private
+	 * @return  void
+	 */
+	final private function __construct() {}
 }

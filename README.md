@@ -15,6 +15,11 @@ Via Composer
 }
 ```
 
+## Usage
+
+``` php
+```
+
 
 ## Credits
 

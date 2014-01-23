@@ -21,7 +21,17 @@
 
 return array(
     /**
-     * Array of instances
+     * Predefined queue instances
      */
-    'instances' => array(),
+    'queue' => array(),
+
+    /**
+     * Default connector
+     */
+    'default' => 'default',
+
+    /**
+     * Connector instances
+     */
+    'connector' => array(),
 );

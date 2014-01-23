@@ -1,7 +1,7 @@
 {
 	"name": "indigophp/fuel-queue",
 	"type": "fuel-package",
-	"description": "Fuel Queue package",
+	"description": "Fuel wrapper around Indigo Queue package",
 	"keywords": ["redis", "resque", "beanstalkd", "queue", "job", "worker"],
 	"homepage": "https://indigophp.com/",
 	"license": "MIT",
