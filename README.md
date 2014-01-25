@@ -42,6 +42,12 @@ Via Composer
         return new Indigo\Queue\Connector\BeanstalkdConnector($pheanstalk);
     }
 ),
+
+/**
+ * Logger instance for worker (can be a Closure)
+ * Must evaluate to Psr\Log\LoggerInterface
+ */
+'logger' => \Log::instance(),
 ```
 
 2.Create queue instance
