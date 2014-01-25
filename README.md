@@ -17,7 +17,59 @@ Via Composer
 
 ## Usage
 
+1.Update your `config/queue.php`
+
 ``` php
+/**
+ * Predefined queue instances
+ */
+'queue' => array(
+    'email' => null,
+    'process' => 'beanstalk'
+),
+
+/**
+ * Default connector
+ */
+'default' => 'beanstalk',
+
+/**
+ * Connector instances
+ */
+'connector' => array(
+    'beanstalk' => function () {
+        $pheanstalk = new Pheanstalk_Pheanstalk('localhost', 11300);
+        return new Indigo\Queue\Connector\BeanstalkdConnector($pheanstalk);
+    }
+),
+```
+
+2.Create queue instance
+
+``` php
+// Simple way
+\Queue::forge('process');
+
+// Predefined connector
+\Queue::forge('process', 'beanstalk');
+
+// Connector injected
+$pheanstalk = new Pheanstalk_Pheanstalk('localhost', 11300);
+$connector = Indigo\Queue\Connector\BeanstalkdConnector($pheanstalk);
+\Queue::forge('process', $connector);
+
+// New queue
+\Queue::forge('new_queue', 'beanstalk');
+```
+
+3.Run your worker
+
+``` bash
+oil r worker process
+```
+
+``` bash
+oil r worker *queue* [connector] [--quiet]
 ```
 
 
