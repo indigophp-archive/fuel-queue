@@ -10,7 +10,7 @@ Via Composer
 ``` json
 {
     "require": {
-        "indigophp/fuel-queue": "@stable"
+        "indigophp/fuel-queue": "dev-master"
     }
 }
 ```
