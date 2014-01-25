@@ -14,4 +14,5 @@ Autoloader::add_core_namespace('Queue');
 
 Autoloader::add_classes(array(
     'Queue\\Queue' => __DIR__ . '/classes/queue.php',
+    'Queue\\Worker' => __DIR__ . '/classes/worker.php',
 ));

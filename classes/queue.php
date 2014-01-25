@@ -35,7 +35,7 @@ class Queue
 	 * Forge and return new instance
 	 *
 	 * @param  string $queue     Queue name
-	 * @param  string $connector Connector name
+	 * @param  string $connector Connector name or instance
 	 * @return Queue
 	 */
 	public static function forge($queue, $connector = null)
@@ -44,15 +44,11 @@ class Queue
 		{
 			$connector = \Config::get('queue.queue.' . $queue);
 
-			// ConnectorInterface injected here
-			if ( ! $connector instanceof ConnectorInterface)
-			{
-				// Queue is not found or set to null: default
-				is_null($connector) and $connector = \Config::get('queue.default');
-
-				$connector = \Config::get('queue.connector.' . $connector);
-			}
+			// Queue is not found or set to null: default
+			is_null($connector) and $connector = \Config::get('queue.default');
 		}
+
+		is_string($connector) and $connector = \Config::get('queue.connector.' . $connector);
 
 		if ( ! $connector instanceof ConnectorInterface)
 		{
