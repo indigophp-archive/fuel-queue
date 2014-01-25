@@ -4,10 +4,10 @@
  *
  * @package 	Fuel
  * @subpackage	Queue
- * @version		1.0
+ * @version		2.0
  * @author 		Márk Sági-Kazár <mark.sagikazar@gmail.com>
  * @license 	MIT License
- * @link 		https://github.com/indigo-soft
+ * @link 		https://indigophp.com
  */
 
 /**
@@ -20,41 +20,18 @@
  */
 
 return array(
+    /**
+     * Predefined queue instances
+     */
+    'queue' => array(),
 
-	/**
-	 * Default settings
-	 */
-	'defaults' => array(
+    /**
+     * Default connector
+     */
+    'default' => 'default',
 
-		/**
-		 * Queue driver
-		 */
-		'driver' => 'direct',
-
-		/**
-		 * Auto initialize queue
-		 */
-		'auto' => false,
-
-		/**
-		 * Connection info
-		 */
-		'connection' => array(
-			/**
-			 * Queue host
-			 */
-			'host' => '127.0.0.1',
-
-			/**
-			 * Queue port
-			 */
-			'port' => 11300,
-		)
-	),
-	/**
-	 * Queues
-	 */
-	'queues' => array(
-		'default' => array(),
-	)
+    /**
+     * Connector instances
+     */
+    'connector' => array(),
 );
