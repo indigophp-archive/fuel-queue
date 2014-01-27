@@ -34,4 +34,10 @@ return array(
      * Connector instances
      */
     'connector' => array(),
+
+    /**
+     * Logger instance for worker
+     * Must evaluate to Psr\Log\LoggerInterface
+     */
+    'logger' => \Log::instance(),
 );

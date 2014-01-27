@@ -49,7 +49,7 @@ class Worker
         }
 
         $instance = new \Indigo\Queue\Worker($queue, $connector);
-        $instance->setLogger(\Log::instance());
+        $instance->setLogger(\Config::get('queue.logger', \Log::instance()));
 
         return $instance;
     }
