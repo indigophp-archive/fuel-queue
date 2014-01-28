@@ -6,13 +6,6 @@ namespace Fuel\Tasks;
 
 class Worker
 {
-	/**
-	 * Shutdown callable
-	 *
-	 * @var callable
-	 */
-	protected $shutdown;
-
 	public function __construct()
 	{
 		$shutdown = function() {
@@ -40,9 +33,6 @@ class Worker
 	public function run($queue = 'default', $connector = null)
 	{
 		$worker = \Worker::forge($queue, $connector);
-
-		// Register shutdown function to catch exit
-		// \Event::register('shutdown', $this->shutdown);
 
 		$interval = \Cli::option('interval', \Cli::option('i', 5));
 
