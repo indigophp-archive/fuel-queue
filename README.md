@@ -1,5 +1,9 @@
 # Fuel Queue
 
+[![Latest Stable Version](https://poser.pugx.org/indigophp/fuel-queue/v/stable.png)](https://packagist.org/packages/indigophp/fuel-queue)
+[![Total Downloads](https://poser.pugx.org/indigophp/fuel-queue/downloads.png)](https://packagist.org/packages/indigophp/fuel-queue)
+[![License](https://poser.pugx.org/indigophp/fuel-queue/license.png)](https://packagist.org/packages/indigophp/fuel-queue)
+
 This package is a wrapper around [indigophp/queue](https://github.com/indigophp/queue) package.
 
 
