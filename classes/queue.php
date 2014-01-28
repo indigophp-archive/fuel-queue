@@ -65,7 +65,7 @@ class Queue
 	 * Return a queue instance
 	 *
 	 * @param  string $queue Queue name
-	 * @return ConnectorInterface
+	 * @return Queue
 	 */
 	public static function instance($queue = null)
 	{
