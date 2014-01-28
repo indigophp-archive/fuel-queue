@@ -14,7 +14,7 @@ Via Composer
 ``` json
 {
     "require": {
-        "indigophp/fuel-queue": "dev-master"
+        "indigophp/fuel-queue": "@stable"
     }
 }
 ```
