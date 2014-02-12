@@ -65,7 +65,7 @@ Via Composer
 
 // Connector injected
 $pheanstalk = new Pheanstalk_Pheanstalk('localhost', 11300);
-$connector = Indigo\Queue\Connector\BeanstalkdConnector($pheanstalk);
+$connector = new Indigo\Queue\Connector\BeanstalkdConnector($pheanstalk);
 \Queue::forge('process', $connector);
 
 // New queue
