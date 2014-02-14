@@ -4,7 +4,7 @@
 [![Total Downloads](https://poser.pugx.org/indigophp/fuel-queue/downloads.png)](https://packagist.org/packages/indigophp/fuel-queue)
 [![License](https://poser.pugx.org/indigophp/fuel-queue/license.png)](https://packagist.org/packages/indigophp/fuel-queue)
 
-This package is a wrapper around [indigophp/queue](https://github.com/indigophp/queue) package.
+**This package is a wrapper around [indigophp/queue](https://github.com/indigophp/queue) package.**
 
 
 ## Install
@@ -19,9 +19,37 @@ Via Composer
 }
 ```
 
+
 ## Usage
 
-1.Update your `config/queue.php`
+``` php
+// Simple way
+\Queue::forge('process');
+
+// Predefined connector
+\Queue::forge('process', 'beanstalk');
+
+// Connector injected
+$pheanstalk = new Pheanstalk_Pheanstalk('localhost', 11300);
+$connector = new Indigo\Queue\Connector\BeanstalkdConnector($pheanstalk);
+\Queue::forge('process', $connector);
+
+// New queue
+\Queue::forge('new_queue', 'beanstalk');
+```
+
+Run your worker
+
+``` bash
+oil r worker process
+```
+
+``` bash
+oil r worker *queue* [connector] [--quiet]
+```
+
+
+## Configuration
 
 ``` php
 /**
@@ -52,34 +80,6 @@ Via Composer
  * Must evaluate to Psr\Log\LoggerInterface
  */
 'logger' => \Log::instance(),
-```
-
-2.Create queue instance
-
-``` php
-// Simple way
-\Queue::forge('process');
-
-// Predefined connector
-\Queue::forge('process', 'beanstalk');
-
-// Connector injected
-$pheanstalk = new Pheanstalk_Pheanstalk('localhost', 11300);
-$connector = new Indigo\Queue\Connector\BeanstalkdConnector($pheanstalk);
-\Queue::forge('process', $connector);
-
-// New queue
-\Queue::forge('new_queue', 'beanstalk');
-```
-
-3.Run your worker
-
-``` bash
-oil r worker process
-```
-
-``` bash
-oil r worker *queue* [connector] [--quiet]
 ```
 
 
