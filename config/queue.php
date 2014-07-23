@@ -1,13 +1,12 @@
 <?php
-/**
- * Fuel Queue
+
+/*
+ * This file is part of the Fuel Queue package.
  *
- * @package 	Fuel
- * @subpackage	Queue
- * @version		2.0
- * @author 		Márk Sági-Kazár <mark.sagikazar@gmail.com>
- * @license 	MIT License
- * @link 		https://indigophp.com
+ * (c) Indigo Development Team
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 /**
@@ -19,25 +18,4 @@
  * This will allow you to upgrade fuel without losing your custom config.
  */
 
-return array(
-    /**
-     * Predefined queue instances
-     */
-    'queue' => array(),
-
-    /**
-     * Default connector
-     */
-    'default' => 'default',
-
-    /**
-     * Connector instances
-     */
-    'connector' => array(),
-
-    /**
-     * Logger instance for worker
-     * Must evaluate to Psr\Log\LoggerInterface
-     */
-    'logger' => \Log::instance(),
-);
+return array();
