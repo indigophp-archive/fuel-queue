@@ -1,0 +1,4 @@
+composer.lock
+/vendor
+/fuel
+/tests/_output
