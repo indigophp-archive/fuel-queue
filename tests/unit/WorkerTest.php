@@ -29,13 +29,4 @@ class WorkerTest extends Test
 
         $this->assertInstanceOf('Indigo\\Queue\\Worker', $class);
     }
-
-    /**
-     * @covers            ::forge
-     * @expectedException InvalidArgumentException
-     */
-    public function testForgeFailure()
-    {
-        Worker::forge('THIS_SHOULD_NEVER_EXIST');
-    }
 }

@@ -37,6 +37,20 @@ class Queue extends \Facade
 	 */
 	public static function forge($instance = 'default')
 	{
+		return static::newInstance($instance, new QueueClass($instance, static::resolveConnector($instance)));
+	}
+
+	/**
+	 * Resolves a connector instance
+	 *
+	 * @param string $instance
+	 *
+	 * @return ConnectorInterface
+	 *
+	 * @throws InvalidArgumentException If $connector is not a valid ConnectorInterface
+	 */
+	public static function resolveConnector($instance)
+	{
 		$connector = \Config::get('queue.queue.' . $instance);
 
 		if ($connector instanceof ConnectorInterface === false)
@@ -44,6 +58,6 @@ class Queue extends \Facade
 			throw new \InvalidArgumentException('Invalid Connector');
 		}
 
-		return static::newInstance($instance, new QueueClass($instance, $connector));
+		return $connector;
 	}
 }

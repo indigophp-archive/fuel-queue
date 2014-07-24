@@ -32,11 +32,21 @@ class QueueTest extends Test
 	}
 
 	/**
-	 * @covers            ::forge
+	 * @covers ::resolveConnector
+	 */
+	public function testResolve()
+	{
+		$connector = Queue::resolveConnector('test');
+
+		$this->assertInstanceOf('Indigo\\Queue\\Connector\\ConnectorInterface', $connector);
+	}
+
+	/**
+	 * @covers            ::resolveConnector
 	 * @expectedException InvalidArgumentException
 	 */
-	public function testForgeFailure()
+	public function testResolveFailure()
 	{
-		Queue::forge('THIS_SHOULD_NEVER_EXIST');
+		Queue::resolveConnector('THIS_SHOULD_NEVER_EXIST');
 	}
 }
