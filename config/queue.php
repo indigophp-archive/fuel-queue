@@ -18,4 +18,20 @@
  * This will allow you to upgrade fuel without losing your custom config.
  */
 
-return array();
+return array(
+	/**
+	 * Predefined queue instances
+	 */
+	'queue' => array(),
+
+	/**
+	 * Connector instances
+	 */
+	'connector' => array(),
+
+	/**
+	 * Logger instance for worker
+	 * Must evaluate to Psr\Log\LoggerInterface
+	 */
+	'logger' => \Log::instance(),
+);

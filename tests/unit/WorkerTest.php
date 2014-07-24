@@ -17,7 +17,7 @@ class WorkerTest extends Test
     public function _before()
     {
         Worker::_init();
-        \Config::set('queue.test', \Mockery::mock('Indigo\\Queue\\Connector\\ConnectorInterface'));
+        \Config::set('queue.queue.test', \Mockery::mock('Indigo\\Queue\\Connector\\ConnectorInterface'));
     }
 
     /**

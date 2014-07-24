@@ -37,7 +37,7 @@ class Queue extends \Facade
 	 */
 	public static function forge($instance = 'default')
 	{
-		$connector = \Config::get('queue.' . $instance);
+		$connector = \Config::get('queue.queue.' . $instance);
 
 		if ($connector instanceof ConnectorInterface === false)
 		{

@@ -13,6 +13,7 @@ namespace Indigo\Fuel;
 
 use Indigo\Queue\Connector\ConnectorInterface;
 use Indigo\Queue\Worker as WorkerClass;
+use Psr\Log\LoggerInterface;
 
 /**
  * Worker Facade class
@@ -37,13 +38,19 @@ class Worker extends \Facade
 	 */
 	public static function forge($instance = 'default')
 	{
-		$connector = \Config::get('queue.' . $instance);
+		$connector = \Config::get('queue.queue.' . $instance);
 
 		if ($connector instanceof ConnectorInterface === false)
 		{
 			throw new \InvalidArgumentException('Invalid Connector');
 		}
 
-		return static::newInstance($instance, new WorkerClass($instance, $connector));
+		$worker = new WorkerClass($instance, $connector);
+
+		if ($logger = \Config::get('queue.logger') and $logger instanceof LoggerInterface) {
+			$worker->setLogger($logger);
+		}
+
+		return static::newInstance($instance, $worker);
 	}
 }
