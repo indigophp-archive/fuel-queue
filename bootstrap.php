@@ -1,14 +1,12 @@
 <?php
-/**
- * Fuel Queue
+
+/*
+ * This file is part of the Fuel Queue package.
  *
- * @package 	Fuel
- * @subpackage	Queue
- * @version 	2.0
- * @author		Márk Sági-Kazár <mark.sagikazar@gmail.com>
- * @license 	MIT License
- * @copyright	2013 - 2014 Indigo Development Team
- * @link		https://indigophp.com
+ * (c) Indigo Development Team
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 Autoloader::add_core_namespace('Queue');
