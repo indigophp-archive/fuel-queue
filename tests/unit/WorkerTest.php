@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Fuel Queue package.
+ *
+ * (c) Indigo Development Team
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Indigo\Fuel;
 
 use Codeception\TestCase\Test;
