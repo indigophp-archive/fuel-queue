@@ -19,7 +19,8 @@
     "require-dev": {
         "indigophp/queue": "dev-develop",
         "codeception/codeception": "~2.0.0",
-        "codeception/mockery-module": "dev-master"
+        "codeception/mockery-module": "dev-master",
+        "indigophp/codeception-fuel-module": "dev-develop"
     },
     "autoload": {
         "psr-4": {

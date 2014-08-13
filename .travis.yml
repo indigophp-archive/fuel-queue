@@ -3,14 +3,7 @@ php:
   - 5.4
   - 5.5
 
-script:
-  - cd /tmp/fuel/fuel/packages/queue/
-  - vendor/bin/codecept run
+script: vendor/bin/codecept run
 
 before_script:
-  - curl get.fuelphp.com/oil | sh
-  - cd /tmp
-  - oil create fuel
-  - cp -r $TRAVIS_BUILD_DIR fuel/fuel/packages/queue/
-  - cd fuel/fuel/packages/queue/
-  - composer install --prefer-source
+  - composer install
