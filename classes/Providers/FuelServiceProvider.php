@@ -12,6 +12,7 @@
 namespace Indigo\Fuel\Queue\Providers;
 
 use Fuel\Dependency\ServiceProvider;
+use Fuel\Dependency\ResolveException;
 use Indigo\Queue\Connector;
 use Indigo\Queue\Queue;
 
@@ -62,21 +63,34 @@ class FuelServiceProvider extends ServiceProvider
 	{
 		$this->register('queue', function($dic, $name, $config = [])
 		{
-			$connector = $this->getConnector($dic, $name, $config);
+			$config = $this->resolveConfig($name, $config);
 
-			return $dic->resolve('Indigo\\Queue\\Queue', [$name, $connector]);
+			$connector = $this->resolveConnector($dic, $name, $config);
+
+			$logger = $this->resolveLogger($dic, $name, $config);
+
+			$queue = $dic->resolve('Indigo\\Queue\\Queue', [$name, $connector]);
+
+			return $queue->setLogger($logger);
 		});
 
 		$this->register('worker', function($dic, $name, $config = [])
 		{
-			$connector = $this->getConnector($dic, $name, $config);
+			$config = $this->resolveConfig($name, $config);
 
-			return $dic->resolve('Indigo\\Queue\\Worker', [$name, $connector]);
+			$connector = $this->resolveConnector($dic, $name, $config);
+
+			$logger = $this->resolveLogger($dic, $name, $config);
+
+			$worker = $dic->resolve('Indigo\\Queue\\Worker', [$name, $connector]);
+
+			return $worker->setLogger($logger);
 		});
 
-		$this->register('queue.beanstalk', function($dic, $name, array $config = [])
+		$this->register('queue.beanstalk', function($dic, array $config = [])
 		{
-			$pheanstalk = $dic->resolve('Pheanstalk\\Pheanstalk', \Arr::filter_keys($config, ['host', 'port']));
+			$config = \Arr::filter_keys($config, ['host', 'port']);
+			$pheanstalk = $dic->resolve('Pheanstalk\\Pheanstalk', $config);
 
 			return $dic->resolve('Indigo\\Queue\\Connector\\BeanstalkConnector', [$pheanstalk]);
 		});
@@ -87,15 +101,35 @@ class FuelServiceProvider extends ServiceProvider
 		});
 	}
 
-	public function getConnector($dic, $name, $config = [])
+	/**
+	 * Resolves config for an instance
+	 *
+	 * @param string $name
+	 * @param mixed  $config
+	 *
+	 * @return []
+	 */
+	protected function resolveConfig($name, $config)
 	{
 		if ( ! is_array($config))
 		{
 			$config = ['connector' => $config];
 		}
 
-		$config = array_merge($this->defaultConfig, \Config::get('queue.queues.', $name, []), $config);
+		return array_merge($this->defaultConfig, \Config::get('queue.queues.'.$name, []), $config);
+	}
 
+	/**
+	 * Resolves a connector
+	 *
+	 * @param DiC    $dic
+	 * @param string $name
+	 * @param []     $config
+	 *
+	 * @return Indigo\Queue\Connector
+	 */
+	public function resolveConnector($dic, $name, array $config)
+	{
 		// determine the connector to load
 		if ($config['connector'] instanceof Connector)
 		{
@@ -103,7 +137,7 @@ class FuelServiceProvider extends ServiceProvider
 		}
 		elseif (strpos('\\', $config['connector']) !== false and class_exists($config['connector']))
 		{
-			$connector = $dic->resolve($config['connector'], [$config]);
+			$connector = $dic->multiton($config['connector'], $name, [$config]);
 		}
 		else
 		{
@@ -111,5 +145,28 @@ class FuelServiceProvider extends ServiceProvider
 		}
 
 		return $connector;
+	}
+
+	/**
+	 * Resolves a logger
+	 *
+	 * @param DiC    $dic
+	 * @param string $name
+	 * @param []     $config
+	 *
+	 * @return Psr\Log\LoggerInterface
+	 */
+	protected function resolveLogger($dic, $name, array $config)
+	{
+		try
+		{
+			$logger = $dic->resolve('logger.'.\Arr::get($config, 'logger'));
+		}
+		catch (ResolveException $e)
+		{
+			$logger = $dic->resolve('Psr\\Log\\NullLogger');
+		}
+
+		return $logger;
 	}
 }
