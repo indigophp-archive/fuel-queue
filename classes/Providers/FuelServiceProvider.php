@@ -62,33 +62,16 @@ class FuelServiceProvider extends ServiceProvider
 	{
 		$this->register('queue', function($dic, $name, $config = [])
 		{
-			if (is_array($config))
-			{
-				$connector = \Arr::get($config, 'connector', '');
-				\Arr::delete($config, 'connector');
-			}
+			$connector = $this->getConnector($dic, $name, $config);
 
-			$config = array_merge($this->defaultConfig, \Config::get('queue.queues.', $name, []), $config);
+			return $dic->resolve('Indigo\\Queue\\Queue', [$name, $connector]);
+		});
 
-			// determine the connector to load
-			if ($config['connector'] instanceof Connector)
-			{
-				$connector = $config['connector'];
-			}
-			elseif (strpos('\\', $config['connector']) !== false and class_exists($config['connector']))
-			{
-				$connector = $config['connector'];
-			}
-			else
-			{
-				$connector = 'queue.'.strtolower($config['connector']);
-			}
+		$this->register('worker', function($dic, $name, $config = [])
+		{
+			$connector = $this->getConnector($dic, $name, $config);
 
-			// try to resolve the connector if necessarry
-			if ( ! $config['connector'] instanceof Connector)
-			{
-				$connector = $dic->multiton($connector, $name, $config);
-			}
+			return $dic->resolve('Indigo\\Queue\\Worker', [$name, $connector]);
 		});
 
 		$this->register('queue.beanstalk', function($dic, $name, array $config = [])
@@ -97,5 +80,36 @@ class FuelServiceProvider extends ServiceProvider
 
 			return $dic->resolve('Indigo\\Queue\\Connector\\BeanstalkConnector', [$pheanstalk]);
 		});
+
+		$this->register('queue.direct', function($dic)
+		{
+			return $dic->resolve('Indigo\\Queue\\Connector\\DirectConnector');
+		});
+	}
+
+	public function getConnector($dic, $name, $config = [])
+	{
+		if ( ! is_array($config))
+		{
+			$config = ['connector' => $config];
+		}
+
+		$config = array_merge($this->defaultConfig, \Config::get('queue.queues.', $name, []), $config);
+
+		// determine the connector to load
+		if ($config['connector'] instanceof Connector)
+		{
+			$connector = $config['connector'];
+		}
+		elseif (strpos('\\', $config['connector']) !== false and class_exists($config['connector']))
+		{
+			$connector = $dic->resolve($config['connector'], [$config]);
+		}
+		else
+		{
+			$connector = $dic->multiton('queue.'.strtolower($config['connector']), $name, [$config]);
+		}
+
+		return $connector;
 	}
 }
