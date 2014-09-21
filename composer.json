@@ -25,7 +25,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Indigo\\Fuel\\": "classes/"
+            "Indigo\\Fuel\\Queue\\": "classes/"
         }
     },
     "extra": {
